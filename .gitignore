@@ -1,0 +1,23 @@
+# Claude-specific files (kept private; this is an OSS project)
+CLAUDE.md
+.claude/
+
+# Design artifacts / prototype (not tracked)
+concept/
+
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+out/
+dist/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs & OS
+*.log
+.DS_Store
