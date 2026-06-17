@@ -10,15 +10,15 @@ A lightweight, **GitHub-native** project-management app for small teams. Terrago
 
 ## Docs
 
-| Doc | What it covers |
-|-----|----------------|
-| [`docs/concept-validation.md`](docs/concept-validation.md) | Critical review of the concept; risks, gaps, and the locked decisions |
-| [`docs/architecture.md`](docs/architecture.md) | System architecture, GitHub API strategy, data model, status model (with diagrams) |
-| [`docs/design.md`](docs/design.md) | UX / interface design |
-| [`docs/ui-spec.md`](docs/ui-spec.md) | Concrete design tokens, typography, interaction constants |
-| [`docs/prototype-review.md`](docs/prototype-review.md) | Review of the original interactive prototype |
-| [`docs/implementation-plan.md`](docs/implementation-plan.md) | Phased build plan (0–6) |
-| [`docs/delivery-plan.md`](docs/delivery-plan.md) | Execution process: task groups + PR workflow |
+| Doc                                                          | What it covers                                                                     |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| [`docs/concept-validation.md`](docs/concept-validation.md)   | Critical review of the concept; risks, gaps, and the locked decisions              |
+| [`docs/architecture.md`](docs/architecture.md)               | System architecture, GitHub API strategy, data model, status model (with diagrams) |
+| [`docs/design.md`](docs/design.md)                           | UX / interface design                                                              |
+| [`docs/ui-spec.md`](docs/ui-spec.md)                         | Concrete design tokens, typography, interaction constants                          |
+| [`docs/prototype-review.md`](docs/prototype-review.md)       | Review of the original interactive prototype                                       |
+| [`docs/implementation-plan.md`](docs/implementation-plan.md) | Phased build plan (0–6)                                                            |
+| [`docs/delivery-plan.md`](docs/delivery-plan.md)             | Execution process: task groups + PR workflow                                       |
 
 ## Stack (planned)
 
