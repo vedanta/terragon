@@ -1,14 +1,23 @@
 import { Sidebar } from "@/components/app-shell/sidebar";
 import { TopBar } from "@/components/app-shell/top-bar";
+import { ToastProvider } from "@/components/toast/toast";
+import { CommandPalette } from "@/components/command-palette/command-palette";
+import { getIssues } from "@/lib/data";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const issues = getIssues();
   return (
-    <div className="flex h-screen bg-bg text-fg">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar />
-        <main className="min-h-0 flex-1 overflow-auto bg-col">{children}</main>
+    <ToastProvider>
+      <div className="flex h-screen bg-bg text-fg">
+        <Sidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TopBar />
+          <main className="min-h-0 flex-1 overflow-auto bg-col">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+      <CommandPalette issues={issues} />
+    </ToastProvider>
   );
 }
