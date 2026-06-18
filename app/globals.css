@@ -72,3 +72,68 @@ body {
   color: var(--text);
   font-family: var(--font-sans);
 }
+
+/* Command palette (cmdk) — headless, styled via its data attributes. */
+[cmdk-overlay] {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 60;
+}
+[cmdk-dialog] {
+  position: fixed;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90vw;
+  max-width: 560px;
+  z-index: 61;
+}
+[cmdk-root] {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+[cmdk-input] {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+[cmdk-list] {
+  max-height: 340px;
+  overflow: auto;
+  padding: 6px;
+}
+[cmdk-empty] {
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-3);
+}
+[cmdk-group-heading] {
+  padding: 8px 8px 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+[cmdk-item] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+[cmdk-item][data-selected="true"] {
+  background: var(--hover);
+}
