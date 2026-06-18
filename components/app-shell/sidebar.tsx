@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -18,9 +19,13 @@ export function Sidebar() {
   return (
     <aside className="flex w-56 shrink-0 flex-col gap-4 border-r border-border bg-subtle px-3 py-4">
       <div className="flex items-center gap-2 px-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-accent text-sm font-semibold text-white">
-          T
-        </span>
+        <Image
+          src="/terragon.png"
+          alt=""
+          width={24}
+          height={24}
+          className="rounded-md"
+        />
         <span className="text-[15px] font-semibold tracking-tight text-fg">
           Terragon
         </span>

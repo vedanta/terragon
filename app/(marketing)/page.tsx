@@ -1,12 +1,17 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function MarketingPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-bg px-6 text-center text-fg">
       <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-base font-semibold text-white">
-          T
-        </span>
+        <Image
+          src="/terragon.png"
+          alt=""
+          width={40}
+          height={40}
+          className="rounded-lg"
+        />
         <span className="text-2xl font-semibold tracking-tight">Terragon</span>
       </div>
       <p className="max-w-md text-[15px] text-fg-muted">

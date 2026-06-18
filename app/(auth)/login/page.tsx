@@ -1,10 +1,16 @@
+import Image from "next/image";
+
 export default function LoginPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-5 bg-bg px-6 text-center text-fg">
       <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-base font-semibold text-white">
-          T
-        </span>
+        <Image
+          src="/terragon.png"
+          alt=""
+          width={40}
+          height={40}
+          className="rounded-lg"
+        />
         <span className="text-xl font-semibold tracking-tight">Terragon</span>
       </div>
       <button
