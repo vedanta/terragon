@@ -5,6 +5,15 @@ on:
   push:
     branches: [main]
 
+# Dummy values so the app modules load and build without real secrets.
+# Real auth/DB are exercised at runtime (local dev + deployed envs), not in CI.
+env:
+  AUTH_SECRET: ci-dummy-secret-not-used-for-real-auth
+  AUTH_GITHUB_ID: dummy
+  AUTH_GITHUB_SECRET: dummy
+  TERRAGON_ENCRYPTION_KEY: ci0000000000000000000000000000000000000000000000000000000000000000
+  DATABASE_URL: postgresql://user:password@localhost:5432/placeholder
+
 jobs:
   verify:
     name: Lint · Typecheck · Test · Build

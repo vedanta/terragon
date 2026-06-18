@@ -12,11 +12,18 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@auth/drizzle-adapter": "^1.11.2",
+    "@neondatabase/serverless": "^1.1.0",
     "cmdk": "^1.1.1",
+    "drizzle-orm": "^0.45.2",
     "next": "16.2.9",
+    "next-auth": "^5.0.0-beta.31",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -26,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "prettier": "^3.8.4",
