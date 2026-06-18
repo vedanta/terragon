@@ -6,6 +6,9 @@ import GitHub from "next-auth/providers/github";
  * Used by `proxy.ts` for session checks and merged into the full `auth.ts`.
  */
 export default {
+  // Trust the host in all environments (Vercel auto-trusts; self-hosted /
+  // `next start` / CI do not, which breaks session resolution in proxy.ts).
+  trustHost: true,
   providers: [
     GitHub({
       authorization: { params: { scope: "read:user repo" } },
