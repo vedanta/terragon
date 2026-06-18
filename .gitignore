@@ -21,3 +21,11 @@ dist/
 # Logs & OS
 *.log
 .DS_Store
+
+# Next.js / build
+next-env.d.ts
+*.tsbuildinfo
+.vercel
+/coverage
+*.pem
+npm-debug.log*
