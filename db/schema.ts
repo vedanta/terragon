@@ -16,7 +16,8 @@ const uuid = () => randomUUID();
 export const users = pgTable("user", {
   id: text("id").primaryKey().$defaultFn(uuid),
   name: text("name"),
-  email: text("email").notNull(),
+  // Nullable: GitHub users with a private email return no email at sign-in.
+  email: text("email"),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
 });
