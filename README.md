@@ -1,4 +1,8 @@
-# Terragon
+<p align="center">
+  <img src="public/terragon.png" alt="Terragon" width="128" height="128" />
+</p>
+
+<h1 align="center">Terragon</h1>
 
 A lightweight, **GitHub-native** project-management app for small teams. Terragon turns GitHub Issues into a clean **Kanban + grooming** workspace without replacing GitHub as the source of truth.
 

@@ -2,8 +2,9 @@
 CLAUDE.md
 .claude/
 
-# Design artifacts / prototype (not tracked)
+# Design artifacts / prototype / source assets (not tracked; the used asset lives in public/)
 concept/
+images/
 
 # Dependencies
 node_modules/
