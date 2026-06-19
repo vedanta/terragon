@@ -4,6 +4,7 @@ import { listUserRepos, type GitHubRepo } from "@/lib/github-repos";
 import { ErrorBanner } from "@/components/states/error-banner";
 import { EmptyState } from "@/components/states/empty-state";
 import { selectRepo } from "./actions";
+import { WorkspaceSection } from "./workspace-section";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -87,6 +88,8 @@ export default async function SettingsPage() {
           </ul>
         )}
       </div>
+
+      <WorkspaceSection />
     </div>
   );
 }
