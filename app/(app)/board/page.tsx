@@ -37,7 +37,7 @@ export default async function BoardPage() {
             />
           </div>
         ) : (
-          <BoardView issues={issues} />
+          <BoardView issues={issues} live={source === "live"} />
         )}
       </div>
     </div>
