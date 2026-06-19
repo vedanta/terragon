@@ -3,10 +3,10 @@
 import { Command } from "cmdk";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { type Issue } from "@/fixtures/seed";
+import { type BoardIssue } from "@/lib/view/board-issue";
 import { useToast } from "@/components/toast/toast";
 
-export function CommandPalette({ issues }: { issues: Issue[] }) {
+export function CommandPalette({ issues }: { issues: BoardIssue[] }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();

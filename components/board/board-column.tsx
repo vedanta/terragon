@@ -1,4 +1,4 @@
-import { type Column } from "@/lib/board";
+import { type BoardColumn as ColumnVM } from "@/lib/view/board-issue";
 import { IssueCard } from "./issue-card";
 
 export function BoardColumn({
@@ -8,7 +8,7 @@ export function BoardColumn({
   onDragStart,
   onDragEnd,
 }: {
-  column: Column;
+  column: ColumnVM;
   draggingId: number | null;
   onOpen: (n: number) => void;
   onDragStart: (n: number) => void;

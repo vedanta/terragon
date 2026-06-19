@@ -1,4 +1,4 @@
-import { PEOPLE, LABELS, type Issue } from "@/fixtures/seed";
+import { type BoardIssue } from "@/lib/view/board-issue";
 import { Avatar } from "@/components/ui/avatar";
 import { LabelChip } from "@/components/ui/label-chip";
 
@@ -9,13 +9,13 @@ export function IssueCard({
   onDragStart,
   onDragEnd,
 }: {
-  issue: Issue;
+  issue: BoardIssue;
   dragging: boolean;
   onOpen: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
 }) {
-  const person = issue.assignee ? PEOPLE[issue.assignee] : null;
+  const person = issue.assignee;
 
   return (
     <button
@@ -34,7 +34,7 @@ export function IssueCard({
       {issue.labels.length > 0 && (
         <span className="flex flex-wrap gap-1.5">
           {issue.labels.map((l) => (
-            <LabelChip key={l} label={LABELS[l]} />
+            <LabelChip key={l.name} label={l} />
           ))}
         </span>
       )}
