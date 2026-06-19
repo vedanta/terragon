@@ -14,6 +14,14 @@ export const DEFAULT_STATUS_LABELS: StatusLabels = {
   backburner: "terragon/backburner",
 };
 
+/** Default GitHub label colors (hex without #) when Terragon creates them. */
+export const STATUS_LABEL_COLORS: Record<keyof StatusLabels, string> = {
+  planned: "a1a1aa",
+  "in-progress": "5b5bd6",
+  done: "16a34a",
+  backburner: "9ca3af",
+};
+
 export interface TransitionPlan {
   /** Apply this label first (never leave an issue statusless). */
   addLabel: string;

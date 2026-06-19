@@ -7,15 +7,31 @@ export function BoardColumn({
   onOpen,
   onDragStart,
   onDragEnd,
+  onDrop,
 }: {
   column: ColumnVM;
   draggingId: number | null;
   onOpen: (n: number) => void;
   onDragStart: (n: number) => void;
   onDragEnd: () => void;
+  onDrop: () => void;
 }) {
+  const active = draggingId != null;
+
   return (
-    <section className="flex w-72 shrink-0 flex-col rounded-xl bg-col">
+    <section
+      onDragOver={(e) => {
+        if (active) e.preventDefault();
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDrop();
+      }}
+      className={
+        "flex w-72 shrink-0 flex-col rounded-xl bg-col " +
+        (active ? "outline outline-1 outline-dashed outline-border-strong" : "")
+      }
+    >
       <header className="flex items-center gap-2 px-3 py-2.5">
         <span
           className="h-2 w-2 rounded-full"
@@ -28,7 +44,7 @@ export function BoardColumn({
           {column.count}
         </span>
       </header>
-      <div className="flex flex-col gap-2 px-2 pb-2">
+      <div className="flex min-h-12 flex-col gap-2 px-2 pb-2">
         {column.issues.map((issue) => (
           <IssueCard
             key={issue.number}

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { repositories, userRepositories } from "@/db/schema";
+import { getCurrentRepo, saveWorkspaceConfig } from "@/lib/workspace";
 
 /** Upsert the chosen repository and mark it most-recently-opened for the user. */
 export async function selectRepo(formData: FormData) {
@@ -77,5 +78,28 @@ export async function selectRepo(formData: FormData) {
     });
   }
 
+  revalidatePath("/settings");
+}
+
+/** Persist the workspace's status-label names + auto-close behavior. */
+export async function saveWorkspace(formData: FormData) {
+  const session = await auth();
+  if (!session?.user) return;
+  const repo = await getCurrentRepo(session.user.id);
+  if (!repo) return;
+
+  await saveWorkspaceConfig(repo.id, {
+    labels: {
+      planned: String(formData.get("label-planned") || "terragon/planned"),
+      "in-progress": String(
+        formData.get("label-in-progress") || "terragon/in-progress",
+      ),
+      done: String(formData.get("label-done") || "terragon/done"),
+      backburner: String(
+        formData.get("label-backburner") || "terragon/backburner",
+      ),
+    },
+    autoCloseDone: formData.get("autoCloseDone") === "on",
+  });
   revalidatePath("/settings");
 }
