@@ -2,10 +2,14 @@ import { Sidebar } from "@/components/app-shell/sidebar";
 import { TopBar } from "@/components/app-shell/top-bar";
 import { ToastProvider } from "@/components/toast/toast";
 import { CommandPalette } from "@/components/command-palette/command-palette";
-import { getIssues } from "@/lib/data";
+import { getBoardData } from "@/lib/board-data";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const issues = getIssues();
+export default async function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { issues } = await getBoardData();
   return (
     <ToastProvider>
       <div className="flex h-screen bg-bg text-fg">
