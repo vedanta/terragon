@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { groupByStatus } from "@/lib/board";
-import { type Issue } from "@/fixtures/seed";
+import { groupBoardIssues, type BoardIssue } from "@/lib/view/board-issue";
 import { BoardColumn } from "./board-column";
 import { IssueDrawer } from "@/components/issue/issue-drawer";
 import { EmptyState } from "@/components/states/empty-state";
 
-export function BoardView({ issues }: { issues: Issue[] }) {
+export function BoardView({ issues }: { issues: BoardIssue[] }) {
   const [selected, setSelected] = useState<number | null>(null);
   const [dragging, setDragging] = useState<number | null>(null);
 
@@ -15,14 +14,14 @@ export function BoardView({ issues }: { issues: Issue[] }) {
     return (
       <div className="p-6">
         <EmptyState
-          title="No issues yet"
-          subtitle="Connect a repository to see issues here."
+          title="No issues"
+          subtitle="Nothing to show for this repository yet."
         />
       </div>
     );
   }
 
-  const columns = groupByStatus(issues);
+  const columns = groupBoardIssues(issues);
   const selectedIssue = issues.find((i) => i.number === selected) ?? null;
 
   return (

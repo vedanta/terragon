@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PEOPLE, LABELS, type Issue } from "@/fixtures/seed";
+import { type BoardIssue } from "@/lib/view/board-issue";
 import { Avatar } from "@/components/ui/avatar";
 import { LabelChip } from "@/components/ui/label-chip";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/states/empty-state";
 import { useToast } from "@/components/toast/toast";
 import { BulkActionBar } from "./bulk-action-bar";
 
-export function GroomingTable({ issues }: { issues: Issue[] }) {
+export function GroomingTable({ issues }: { issues: BoardIssue[] }) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [drawer, setDrawer] = useState<number | null>(null);
   const { showToast } = useToast();
@@ -71,7 +71,7 @@ export function GroomingTable({ issues }: { issues: Issue[] }) {
           </thead>
           <tbody>
             {issues.map((i) => {
-              const person = i.assignee ? PEOPLE[i.assignee] : null;
+              const person = i.assignee;
               const checked = selected.has(i.number);
               return (
                 <tr
@@ -115,7 +115,7 @@ export function GroomingTable({ issues }: { issues: Issue[] }) {
                   <td className="px-2 py-2">
                     <span className="flex flex-wrap gap-1">
                       {i.labels.map((l) => (
-                        <LabelChip key={l} label={LABELS[l]} />
+                        <LabelChip key={l.name} label={l} />
                       ))}
                     </span>
                   </td>

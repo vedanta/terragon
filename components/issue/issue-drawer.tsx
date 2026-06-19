@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { PEOPLE, LABELS, type Issue } from "@/fixtures/seed";
-import { issueUrl } from "@/lib/board";
+import { type BoardIssue } from "@/lib/view/board-issue";
 import { Avatar } from "@/components/ui/avatar";
 import { LabelChip } from "@/components/ui/label-chip";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -28,7 +27,7 @@ export function IssueDrawer({
   issue,
   onClose,
 }: {
-  issue: Issue | null;
+  issue: BoardIssue | null;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -42,7 +41,7 @@ export function IssueDrawer({
 
   if (!issue) return null;
 
-  const person = issue.assignee ? PEOPLE[issue.assignee] : null;
+  const person = issue.assignee;
 
   return (
     <div className="fixed inset-0 z-40">
@@ -91,7 +90,7 @@ export function IssueDrawer({
             {issue.labels.length ? (
               <span className="flex flex-wrap gap-1.5">
                 {issue.labels.map((l) => (
-                  <LabelChip key={l} label={LABELS[l]} />
+                  <LabelChip key={l.name} label={l} />
                 ))}
               </span>
             ) : (
@@ -110,7 +109,7 @@ export function IssueDrawer({
           <h3 className="mb-1.5 text-[12px] font-semibold uppercase tracking-wide text-fg-subtle">
             Description
           </h3>
-          <p className="text-[13px] leading-relaxed text-fg-muted">
+          <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-fg-muted">
             {issue.description || "No description."}
           </p>
         </div>
@@ -142,21 +141,23 @@ export function IssueDrawer({
           </div>
         )}
 
-        <div>
-          <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-fg-subtle">
-            Activity
-          </h3>
-          <ul className="flex flex-col gap-1 text-[12px] text-fg-subtle">
-            {issue.activity.map((a, i) => (
-              <li key={i}>
-                {a.text} · {a.time}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {issue.activity.length > 0 && (
+          <div>
+            <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-fg-subtle">
+              Activity
+            </h3>
+            <ul className="flex flex-col gap-1 text-[12px] text-fg-subtle">
+              {issue.activity.map((a, i) => (
+                <li key={i}>
+                  {a.text} · {a.time}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <a
-          href={issueUrl(issue.number)}
+          href={issue.url}
           target="_blank"
           rel="noreferrer"
           className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[13px] text-fg hover:bg-hover"
