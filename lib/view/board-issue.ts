@@ -18,6 +18,7 @@ export interface BoardIssue {
   title: string;
   status: StatusKey;
   assignee: Person | null;
+  assigneeLogin: string | null;
   labels: Label[];
   milestone: string | null;
   updated: string;
@@ -80,6 +81,7 @@ export function fromFixtureIssue(i: Issue): BoardIssue {
     title: i.title,
     status: i.status,
     assignee: i.assignee ? PEOPLE[i.assignee] : null,
+    assigneeLogin: i.assignee ?? null,
     labels: i.labels.map((k) => LABELS[k]),
     milestone: i.milestone,
     updated: i.updated,
@@ -104,6 +106,7 @@ export function fromResolvedIssue(i: ResolvedIssue): BoardIssue {
           color: colorFor(a.login),
         }
       : null,
+    assigneeLogin: a?.login ?? null,
     labels: i.labels.map((name) => ({ name, color: colorFor(name) })),
     milestone: i.milestone,
     updated: relativeTime(i.updatedAt),

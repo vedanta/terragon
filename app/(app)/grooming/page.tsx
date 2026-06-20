@@ -1,4 +1,5 @@
 import { getBoardData } from "@/lib/board-data";
+import { getBoardMeta } from "@/lib/board-meta";
 import { GroomingTable } from "@/components/grooming/grooming-table";
 import { RefreshButton } from "@/components/refresh-button";
 import { ErrorBanner } from "@/components/states/error-banner";
@@ -6,6 +7,7 @@ import { EmptyState } from "@/components/states/empty-state";
 
 export default async function GroomingPage() {
   const { issues, repo, error, source } = await getBoardData();
+  const meta = await getBoardMeta();
 
   return (
     <div className="flex h-full flex-col">
@@ -33,7 +35,7 @@ export default async function GroomingPage() {
             />
           </div>
         ) : (
-          <GroomingTable issues={issues} />
+          <GroomingTable issues={issues} meta={meta} />
         )}
       </div>
     </div>

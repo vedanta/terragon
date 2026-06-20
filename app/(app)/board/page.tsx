@@ -1,4 +1,5 @@
 import { getBoardData } from "@/lib/board-data";
+import { getBoardMeta } from "@/lib/board-meta";
 import { BoardView } from "@/components/board/board-view";
 import { RefreshButton } from "@/components/refresh-button";
 import { ErrorBanner } from "@/components/states/error-banner";
@@ -6,6 +7,7 @@ import { EmptyState } from "@/components/states/empty-state";
 
 export default async function BoardPage() {
   const { issues, repo, error, source } = await getBoardData();
+  const meta = await getBoardMeta();
   const subtitle =
     source === "fixtures"
       ? "acme/platform · execution surface"
@@ -37,7 +39,7 @@ export default async function BoardPage() {
             />
           </div>
         ) : (
-          <BoardView issues={issues} live={source === "live"} />
+          <BoardView issues={issues} live={source === "live"} meta={meta} />
         )}
       </div>
     </div>
