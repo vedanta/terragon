@@ -2,7 +2,7 @@
 
 Thanks for your interest in Terragon. This document covers how to set up the project and the workflow contributions follow.
 
-> **License note:** Terragon is licensed under the **Business Source License 1.1** (see [`LICENSE`](LICENSE)). By contributing, you agree that your contributions are licensed under the same terms. The source is available and you may self-host for non-production and permitted production use, but offering a competing hosted service is reserved to the Licensor until the Change Date.
+> **License note:** Terragon is licensed under the **Apache License 2.0** (see [`LICENSE`](LICENSE)). By contributing, you agree that your contributions are licensed under the same terms, including its patent grant (per section 5 of the license).
 
 ## Prerequisites
 
