@@ -15,6 +15,13 @@
       "when": 1781778792977,
       "tag": "0001_email_nullable",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781923587177,
+      "tag": "0002_sync_events",
+      "breakpoints": true
     }
   ]
 }

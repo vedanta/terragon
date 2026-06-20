@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { type BoardIssue } from "@/lib/view/board-issue";
 import { Avatar } from "@/components/ui/avatar";
 import { LabelChip } from "@/components/ui/label-chip";
@@ -9,7 +9,14 @@ import { IssueDrawer } from "@/components/issue/issue-drawer";
 import { EmptyState } from "@/components/states/empty-state";
 import { useToast } from "@/components/toast/toast";
 import { type DrawerMeta } from "@/lib/board-meta";
+import { applyBatch } from "@/app/(app)/grooming/actions";
+import {
+  type Changeset,
+  type IssueRef,
+  type BatchResult,
+} from "@/lib/grooming/service";
 import { BulkActionBar } from "./bulk-action-bar";
+import { BatchResultPanel } from "./batch-result";
 
 export function GroomingTable({
   issues,
@@ -20,6 +27,8 @@ export function GroomingTable({
 }) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [drawer, setDrawer] = useState<number | null>(null);
+  const [result, setResult] = useState<BatchResult | null>(null);
+  const [isPending, startTransition] = useTransition();
   const { showToast } = useToast();
 
   if (issues.length === 0) {
@@ -45,10 +54,19 @@ export function GroomingTable({
     setSelected(allChecked ? new Set() : new Set(issues.map((i) => i.number)));
   }
 
-  function apply() {
-    const c = selected.size;
-    setSelected(new Set());
-    showToast(`Updated ${c} issue${c === 1 ? "" : "s"} · synced to GitHub`);
+  function apply(cs: Changeset) {
+    if (Object.keys(cs).length === 0) {
+      showToast("Pick a change first");
+      return;
+    }
+    const sel: IssueRef[] = issues
+      .filter((i) => selected.has(i.number))
+      .map((i) => ({ number: i.number, status: i.status }));
+    startTransition(async () => {
+      const res = await applyBatch(sel, cs);
+      setResult(res);
+      if (res.failed.length === 0) setSelected(new Set());
+    });
   }
 
   const drawerIssue = issues.find((i) => i.number === drawer) ?? null;
@@ -140,9 +158,15 @@ export function GroomingTable({
       {selected.size > 0 && (
         <BulkActionBar
           count={selected.size}
+          meta={meta}
+          pending={isPending}
           onApply={apply}
           onClear={() => setSelected(new Set())}
         />
+      )}
+
+      {result && (
+        <BatchResultPanel result={result} onDismiss={() => setResult(null)} />
       )}
 
       <IssueDrawer
