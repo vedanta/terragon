@@ -1,6 +1,6 @@
-# Terragon — Application Design
+# Terragon — Design
 
-UX and interface design for Terragon. This document supersedes the design/UI portions of `concept/concept.md` (§7–§11, §24, §31–§32). For technical structure see [`architecture.md`](./architecture.md).
+UX and interface design for Terragon. For technical structure see [`architecture.md`](./architecture.md); for exact tokens and interaction constants see [`ui-spec.md`](./ui-spec.md).
 
 ## Design Principles
 
