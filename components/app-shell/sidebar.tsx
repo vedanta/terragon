@@ -17,7 +17,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col gap-4 border-r border-border bg-subtle px-3 py-4">
+    <aside className="hidden w-56 shrink-0 flex-col gap-4 border-r border-border bg-subtle px-3 py-4 sm:flex">
       <div className="flex items-center gap-2 px-2">
         <Image
           src="/terragon.png"

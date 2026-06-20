@@ -8,6 +8,7 @@ export function TopBar() {
       <RepositorySwitcher />
       <input
         type="search"
+        id="global-search"
         aria-label="Search issues"
         placeholder="Search…"
         className="h-8 w-64 rounded-lg border border-border bg-bg px-3 text-[13px] text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-accent-soft"
