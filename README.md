@@ -102,24 +102,19 @@ npm run db:migrate   # apply migrations
 
 CI (GitHub Actions) runs lint · typecheck · test · build · e2e on every PR; `main` is protected and requires green checks.
 
-## Status & roadmap
+## Roadmap
 
-**MVP complete.** GitHub login, the live board, drag-to-status, inline editing, and batch grooming all work against real GitHub Issues.
-
-Deferred / planned (see open issues): a dedicated create-issue flow, deep-linking from the command palette, a combined public-demo + live mode, and batch-write optimizations. Longer-term V2 ideas (webhooks, multi-repo, saved filters) are in the concept docs.
+Planned (see open issues): a dedicated create-issue flow, deep-linking from the command palette, a combined public-demo + live mode, and batch-write optimizations. Longer-term: webhooks, multi-repo, and saved filters.
 
 ## Docs
 
-| Doc                                                          | What it covers                                                           |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| [`docs/concept-validation.md`](docs/concept-validation.md)   | Critical review of the concept; risks and locked decisions               |
-| [`docs/architecture.md`](docs/architecture.md)               | System architecture, GitHub API strategy, data + status model (diagrams) |
-| [`docs/design.md`](docs/design.md)                           | UX / interface design                                                    |
-| [`docs/ui-spec.md`](docs/ui-spec.md)                         | Design tokens, typography, interaction constants                         |
-| [`docs/prototype-review.md`](docs/prototype-review.md)       | Review of the original interactive prototype                             |
-| [`docs/implementation-plan.md`](docs/implementation-plan.md) | Phased build plan                                                        |
-| [`docs/delivery-plan.md`](docs/delivery-plan.md)             | Execution process: task groups + PR workflow                             |
-| [`docs/retro-terragon.md`](docs/retro-terragon.md)           | Retrospective on the build                                               |
+| Doc                                            | What it covers                                      |
+| ---------------------------------------------- | --------------------------------------------------- |
+| [`docs/quickstart.md`](docs/quickstart.md)     | Get running in a few minutes                        |
+| [`docs/installation.md`](docs/installation.md) | Full self-host + deployment guide                   |
+| [`docs/architecture.md`](docs/architecture.md) | System architecture, data + status model (diagrams) |
+| [`docs/design.md`](docs/design.md)             | UX / interface design                               |
+| [`docs/ui-spec.md`](docs/ui-spec.md)           | Design tokens, typography, interaction constants    |
 
 ## License
 

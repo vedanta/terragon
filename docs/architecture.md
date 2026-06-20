@@ -1,337 +1,201 @@
-# Terragon — Architecture
+# Architecture
 
-Technical architecture for Terragon: a GitHub-native execution layer over GitHub Issues. This document supersedes the architecture portions of `concept/concept.md` (§13–§27) and folds in the decisions from [`concept-validation.md`](./concept-validation.md).
+How Terragon works: a GitHub-native execution layer over GitHub Issues, built with Next.js (App Router).
 
-**Guiding invariant:** GitHub is the system of record. Terragon persists only its own metadata, preferences, and an optional cache. All GitHub calls are server-side; tokens never reach the client.
+**Guiding invariant:** GitHub is the system of record. Terragon stores only its own metadata (settings, repo mappings, encrypted tokens, an audit log) — never a duplicate copy of issues. All GitHub calls happen server-side; tokens never reach the browser.
 
----
-
-## 1. System Context
+## 1. System context
 
 ```mermaid
 flowchart LR
-  User([Team member]) -->|HTTPS| App[Terragon Web App<br/>Next.js App Router]
-  App -->|Server Actions /<br/>Route Handlers| Server[Terragon Server Layer]
+  User([Team member]) -->|HTTPS| App[Terragon<br/>Next.js App Router]
+  App -->|Server Actions /<br/>Route Handlers| Server[Server layer]
   Server -->|reads: GraphQL<br/>writes: REST| GitHub[(GitHub API)]
-  Server -->|metadata only| DB[(Postgres<br/>Neon / Supabase)]
+  Server -->|metadata only| DB[(Postgres / Neon)]
   GitHub --> Data[Issues · Labels<br/>Milestones · Assignees]
 
   classDef ext fill:#eee,stroke:#999;
   class GitHub,Data ext;
 ```
 
-GitHub owns all issue data. The Postgres DB owns only Terragon-specific state (settings, repo mappings, encrypted tokens, sync log, optional cache).
+## 2. Stack
 
----
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router, Server Components) + TypeScript |
+| UI | Tailwind v4 · `cmdk` (command palette) · native HTML5 drag-and-drop |
+| Client state | React `useOptimistic` / `useTransition` (the board); server state via Server Components |
+| Auth | Auth.js v5 (`next-auth`) + GitHub OAuth provider, JWT sessions |
+| Database | Neon Postgres + Drizzle ORM (`drizzle-kit` migrations) |
+| GitHub | Octokit — GraphQL for reads, REST for writes |
+| Hosting | Vercel (Node.js runtime) |
 
-## 2. Containers & Domain Services
+## 3. Code map
 
-```mermaid
-flowchart TB
-  subgraph Client["Browser (Client Components)"]
-    UI[React + shadcn/ui]
-    DnD[dnd-kit drag/drop]
-    Q[TanStack Query<br/>server cache]
-    Z[Zustand<br/>ephemeral UI state]
-  end
-
-  subgraph Next["Next.js Server"]
-    SC[Server Components<br/>initial loads]
-    SA[Server Actions<br/>mutations]
-    RH[Route Handlers<br/>/api/github/* · webhooks]
-  end
-
-  subgraph Domain["Domain Services (server-only)"]
-    GHC[GitHub Client<br/>auth · GraphQL · REST · pagination]
-    ISVC[Issue Service<br/>label↔status · transitions]
-    BSVC[Board Service<br/>group · sort · filter]
-    GSVC[Grooming Service<br/>batch plans · partial results]
-    SSVC[Sync Service<br/>cache · webhooks · audit]
-  end
-
-  DB[(Postgres)]
-  GH[(GitHub GraphQL + REST)]
-
-  UI --> Q --> SA
-  DnD --> SA
-  UI --> SC
-  SC --> ISVC
-  SA --> ISVC
-  SA --> GSVC
-  RH --> SSVC
-  ISVC --> GHC
-  BSVC --> ISVC
-  GSVC --> GHC
-  SSVC --> GHC
-  GHC --> GH
-  ISVC --> DB
-  SSVC --> DB
 ```
-
-**Service responsibilities** (single GitHub client; everything else composes it):
-
-- **GitHub Client** — the only module that talks to GitHub. Hides GraphQL (reads) and REST (writes) behind one typed interface; owns auth headers, pagination, rate-limit handling, and backoff.
-- **Issue Service** — maps a GitHub issue → a Terragon task, resolves status from labels + native state, and enforces transition rules.
-- **Board Service** — groups resolved issues into the four columns, applies sort/filter and board preferences.
-- **Grooming Service** — turns a multi-select + change set into a per-issue update plan, executes with controlled concurrency, returns a partial-success summary.
-- **Sync Service** — on-demand refresh, V2 webhook ingestion, and the audit/sync-event log.
-
----
-
-## 3. GitHub API Strategy
-
-Hybrid by design (see validation §6 — wrapped in one client):
-
-| Concern | API | Why |
-|---------|-----|-----|
-| Read issues, labels, milestones, assignees, pagination | **GraphQL** | One round-trip per page; far more rate-limit efficient than REST list+expand. |
-| Update issue, add/remove labels, set assignees/milestone, close/reopen | **REST** | Simpler, well-documented mutation endpoints; easier partial-failure handling. |
-
-- **Rate limits:** primary 5000/hr per user *and* secondary/abuse limits on bursts. Batch mutations run at concurrency ≤3–5 with exponential backoff on `403`/secondary-limit responses.
-- **Pagination:** cursor-based (GraphQL `pageInfo`). MVP scopes the board to open + recently-closed issues.
-
----
+app/
+  (marketing)/        landing
+  (auth)/login/       sign-in
+  (app)/              authenticated app (board, grooming, prep, milestones, my-work, settings)
+    */actions.ts      server actions (writes)
+  api/auth/[...nextauth]/  Auth.js route handler
+proxy.ts              route protection (Next.js middleware)
+auth.ts / auth.config.ts  Auth.js config (+ encrypted-token adapter)
+db/
+  schema.ts           Drizzle schema
+  index.ts            Neon client
+  migrations/         SQL migrations
+lib/
+  github/client.ts    the single GitHub client (GraphQL + REST, backoff, concurrency)
+  status/resolve.ts   label ↔ status resolution
+  status/transition.ts  status-change planning
+  board/service.ts    raw issues → resolved → columns
+  grooming/service.ts batch plan + execution (partial success)
+  view/board-issue.ts presentation view-model
+  crypto.ts           AES-256-GCM token encryption
+  board-data.ts       data source (fixtures or live, behind USE_FIXTURES)
+  workspace.ts        per-repo settings
+```
 
 ## 4. Authentication
 
-**MVP: Auth.js + GitHub OAuth App** (non-expiring user tokens — simplest). Migrate to a GitHub App for V2 (webhooks, fine-grained perms, expiring tokens).
+Auth.js v5 with the GitHub OAuth provider and JWT sessions. The GitHub **access token is encrypted at rest** before it touches the database, and decrypted only server-side when a request needs to call GitHub.
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant M as Terragon (Next.js)
+  participant T as Terragon
   participant GH as GitHub OAuth
-
-  U->>M: Click "Login with GitHub"
-  M->>GH: Redirect to /authorize (read:user, repo)
-  GH->>U: Consent screen
+  U->>T: Continue with GitHub
+  T->>GH: Authorize (scopes: read:user, repo)
+  GH->>U: Consent
   U->>GH: Approve
-  GH->>M: Redirect /callback?code=...
-  M->>GH: Exchange code → access_token
-  GH-->>M: access_token
-  M->>M: Encrypt token, persist, create session
-  M-->>U: Set HTTP-only, Secure session cookie
+  GH->>T: callback ?code
+  T->>GH: Exchange code → access_token
+  T->>T: Encrypt token (AES-256-GCM), persist account
+  T-->>U: Session cookie (JWT)
 ```
 
-- Scopes: `read:user`, `repo` (private) or `public_repo` (public-only).
-- Tokens are **encrypted at rest** (`TERRAGON_ENCRYPTION_KEY`), decrypted only inside the GitHub Client. Never serialized to the client.
-- Session via HTTP-only Secure cookie; CSRF protection on mutations.
+`proxy.ts` gates the `(app)/*` routes: an unauthenticated request is redirected to `/login`.
 
----
+## 5. Data model
 
-## 5. Data Model
-
-Terragon-owned tables only. GitHub data is fetched live (or cached, never authoritative).
+Terragon-owned tables only (Drizzle, `db/schema.ts`). GitHub issue data is fetched live, never stored as a system of record.
 
 ```mermaid
 erDiagram
-  users ||--o{ accounts : has
-  users ||--o{ user_repositories : opens
-  repositories ||--o{ user_repositories : linked
-  repositories ||--|| workspace_settings : configured_by
-  repositories ||--o{ issue_cache : caches
-  repositories ||--o{ sync_events : logs
-  users ||--o{ grooming_drafts : authors
+  user ||--o{ account : has
+  user ||--o{ session : has
+  user ||--o{ user_repository : opens
+  repository ||--o{ user_repository : linked
+  repository ||--|| workspace_settings : configured_by
+  repository ||--o{ sync_event : logs
 
-  users {
-    uuid id PK
-    bigint github_user_id
-    string github_login
-    string avatar_url
-  }
-  accounts {
-    uuid id PK
-    uuid user_id FK
-    string access_token_encrypted
-  }
-  repositories {
-    uuid id PK
-    bigint github_repo_id
-    string full_name
-    bool private
-  }
-  workspace_settings {
-    uuid id PK
-    uuid repository_id FK
-    string label_planned
-    string label_in_progress
-    string label_done
-    string label_backburner
-    bool auto_close_done
-  }
-  issue_cache {
-    uuid id PK
-    uuid repository_id FK
-    int issue_number
-    string status
-    timestamp updated_at_github
-  }
-  grooming_drafts {
-    uuid id PK
-    uuid user_id FK
-    uuid repository_id FK
-    json draft_payload
-  }
-  sync_events {
-    uuid id PK
-    uuid repository_id FK
-    string event_type
-    string status
-  }
+  user { text id PK; text email; text name; text image }
+  account { text userId FK; text provider; text access_token "encrypted" }
+  repository { text id PK; text github_repo_id; text full_name; bool private }
+  user_repository { text id PK; text user_id FK; text repository_id FK; timestamp last_opened_at }
+  workspace_settings { text id PK; text repository_id FK; text label_planned; bool auto_close_done; text accent; text default_theme }
+  sync_event { text id PK; text repository_id FK; text event_type; text status }
 ```
 
-Notes vs. spec §17: `accounts` drops `refresh_token`/`token_expires_at` for the OAuth-App MVP (re-add with GitHub App). `issue_cache` and `grooming_drafts` are optional — build only when needed.
+## 6. Status model
 
----
-
-## 6. Status Model
-
-Board status lives in the `terragon/*` label namespace, reconciled with GitHub's native open/closed state.
+Board status is stored as GitHub **labels**, reconciled with GitHub's native open/closed state:
 
 ```
 terragon/planned · terragon/in-progress · terragon/done · terragon/backburner
 ```
 
-### Transitions
+### Resolution (read time)
 
-```mermaid
-stateDiagram-v2
-  [*] --> Planned: open, no status
-  Planned --> InProgress
-  InProgress --> Done
-  InProgress --> Planned
-  Done --> Planned
-  Done --> InProgress
-  Planned --> Backburner
-  InProgress --> Backburner
-  Done --> Backburner
-  Backburner --> Planned
-  Done --> [*]: close issue (auto_close_done, default on)
-```
-
-### Status Resolution (read time)
-
-Because labels and native state can disagree (validation §1, §2, §4), status is **resolved on every read** — this also self-heals partial-failure label states:
+Status is resolved on every read, so it self-heals if labels ever drift:
 
 ```mermaid
 flowchart TD
   I[Issue from GitHub] --> Closed{state == closed?}
   Closed -->|yes| Done[Done]
   Closed -->|no| Count{how many terragon/* labels?}
-  Count -->|exactly one| Use[Use that label]
-  Count -->|more than one| Prec[Resolve by precedence:<br/>in-progress &gt; planned &gt; backburner &gt; done]
-  Count -->|none| Mapped{matches a mapped<br/>legacy label?}
-  Mapped -->|yes| UseMapped[Use mapped status]
-  Mapped -->|no| Default[Default → Planned]
+  Count -->|one| Use[that status]
+  Count -->|several| Prec[precedence:<br/>in-progress &gt; planned &gt; backburner &gt; done]
+  Count -->|none| Mapped{matches a mapped label?}
+  Mapped -->|yes| UseMapped[mapped status]
+  Mapped -->|no| Default[default → Planned]
 ```
 
-### Write rule (atomic-safe ordering)
+### Transitions (write time)
 
-To never leave an issue statusless: **add target label first, then remove other `terragon/*` labels.** If the remove step fails, the next read resolves by precedence and a later sync cleans up.
+`transitionPlan()` computes the mutations for a status change. To never leave an issue statusless, the target label is **added first, then the others removed**; moving to Done **closes** the issue (when `auto_close_done` is on) and moving out reopens it.
 
----
+```mermaid
+stateDiagram-v2
+  [*] --> Planned: open, no status
+  Planned --> InProgress
+  InProgress --> Done
+  Done --> InProgress
+  Done --> Planned
+  Planned --> Backburner
+  InProgress --> Backburner
+  Backburner --> Planned
+  Done --> [*]: close issue (auto_close_done)
+```
 
-## 7. Key Flows
+## 7. GitHub client
 
-### Move issue (drag-drop, optimistic + rollback)
+`lib/github/client.ts` is the only module that talks to GitHub — callers never see GraphQL vs REST. It owns:
+
+- **Reads (GraphQL):** issues (paginated), repo metadata (labels, milestones, assignable users), the viewer.
+- **Writes (REST):** add/remove labels, close/reopen, update title/body, set assignees/milestone, ensure the `terragon/*` labels exist.
+- **Resilience:** exponential backoff on rate-limit / secondary-limit responses, and a concurrency limiter (`p-limit`) shared by batched work.
+
+## 8. Key flows
+
+### Move issue (optimistic + rollback)
 
 ```mermaid
 sequenceDiagram
-  participant UI as Board UI
-  participant SA as moveIssue (Server Action)
+  participant UI as Board
+  participant SA as moveIssue (action)
   participant GH as GitHub REST
-
-  UI->>UI: Optimistically move card to target column
-  UI->>SA: moveIssue(repo, #, targetStatus)
-  SA->>GH: Add target terragon/* label
-  SA->>GH: Remove other terragon/* label(s)
-  alt auto_close_done && target == Done
-    SA->>GH: Close issue
+  UI->>UI: optimistically move the card
+  UI->>SA: moveIssue(#, from, to)
+  SA->>GH: add target label → remove others
+  alt to == Done && auto_close_done
+    SA->>GH: close issue
   end
   GH-->>SA: ok
-  SA-->>UI: success → confirm card
-  Note over UI,GH: On any failure, SA returns error →<br/>UI reverts card + shows specific toast
+  SA-->>UI: success
+  Note over UI,GH: on failure the card reverts + a toast explains why
 ```
 
-### Batch grooming update (partial success)
+### Batch grooming (partial success)
 
 ```mermaid
 flowchart TB
-  Sel[Selected issues + change set] --> Plan[Grooming Service:<br/>build per-issue plan]
-  Plan --> Pool{Concurrency pool<br/>≤3-5 in flight}
-  Pool --> Apply[Apply labels / assignee / milestone]
-  Apply -->|2xx| OK[record success]
-  Apply -->|error / rate-limit| Retry{retryable?}
-  Retry -->|yes| Backoff[backoff + requeue]
-  Retry -->|no| Fail[record failure + reason]
-  Backoff --> Pool
-  OK --> Done{pool drained?}
+  Sel[Selected issues + change-set] --> Plan[buildPlan: per-issue ops]
+  Plan --> Pool{concurrency pool}
+  Pool --> Apply[apply labels / assignee / milestone]
+  Apply -->|ok| OK[record updated]
+  Apply -->|error| Fail[record failed + reason]
+  OK --> Done{drained?}
   Fail --> Done
   Done -->|no| Pool
-  Done -->|yes| Summary[Return summary:<br/>'6 of 7 updated · #148 failed: no permission']
+  Done -->|yes| Sum[result: 'N of M updated · #X failed: reason']
 ```
 
-### Sync (V1 on-demand → V2 webhooks)
+A batch never aborts on a single failure — it reports per-issue outcomes and audits the run to `sync_event`.
 
-```mermaid
-flowchart LR
-  subgraph V1[V1 — on demand]
-    Open[Open repo] --> Fetch[Fetch issues]
-    Mut[After mutation] --> Revalidate[Revalidate board]
-    Manual[Manual refresh] --> Fetch
-  end
-  subgraph V2[V2 — webhooks]
-    GH[GitHub events:<br/>issues · label · milestone] --> WH[/api/github/webhook/]
-    WH --> Verify[Verify signature]
-    Verify --> Cache[Update issue_cache]
-    Cache --> Push[Revalidate / push to clients]
-  end
-```
+## 9. Data sources & demo mode
 
----
+`lib/board-data.ts` resolves the board's issues. With `USE_FIXTURES=true` (the default) it serves seeded demo data and makes no GitHub calls — useful for local development and a public demo. With `USE_FIXTURES=false` it loads the signed-in user's selected repository live via the GitHub client and the status resolver.
 
-## 8. Cross-Cutting Concerns
+## 10. Security
 
-- **Caching:** server-side cache for repo metadata; TanStack Query for board data on the client; optional `issue_cache` table for fast reload. Revalidate after every mutation.
-- **Error handling:** specific, calm messages (`Could not update #142 — milestone no longer exists`), never "Something went wrong." Batch operations always report partial success. Expired/invalid auth → prompt re-login.
-- **Security:** all GitHub calls server-side; tokens encrypted at rest and never client-exposed; HTTP-only Secure session cookies; CSRF protection; request minimum scopes; audit every mutation in `sync_events` (user, repo, issue, action, result, timestamp).
-- **Performance targets (MVP):** board load <2s (<200 open issues), drag feedback <300ms (optimistic), batch >20 issues shows progressive state, local search <200ms after load.
+- All GitHub calls are server-side; the access token never reaches the client.
+- Tokens are **encrypted at rest** (AES-256-GCM, `lib/crypto.ts`) and decrypted only in server code.
+- Sessions use HTTP-only cookies (Auth.js); `proxy.ts` enforces auth on app routes.
+- Mutations are audited to `sync_event`.
 
----
+## 11. Deployment
 
-## 9. Routes
-
-```
-app/
-  (marketing)/page.tsx
-  (auth)/login/page.tsx
-  (auth)/callback/route.ts
-  (app)/layout.tsx
-  (app)/prep/page.tsx
-  (app)/board/page.tsx
-  (app)/grooming/page.tsx
-  (app)/milestones/page.tsx
-  (app)/my-work/page.tsx
-  (app)/settings/page.tsx
-api/github/
-  callback/  webhook/  repos/  issues/  batch-update/
-```
-
----
-
-## 10. Deployment
-
-```mermaid
-flowchart LR
-  Dev[Local dev] -->|git push| CI[Vercel build]
-  CI --> Prev[Preview deploy]
-  CI --> Prod[Production]
-  Prod --> Fn[Vercel Functions<br/>Node.js / Fluid Compute]
-  Fn --> Neon[(Neon Postgres<br/>via Marketplace)]
-  Fn --> GH[(GitHub API)]
-  Prod --> Obs[Logs · Sentry · audit table]
-```
-
-- **Hosting:** Vercel (standard Node.js / Fluid Compute runtime — not edge; see validation Tech Corrections).
-- **Database:** Neon Postgres via Vercel Marketplace (Vercel Postgres is deprecated). Drizzle ORM recommended.
-- **Observability:** Vercel logs + Sentry + `sync_events` audit table.
+Deploys to Vercel on the Node.js runtime. Requires `DATABASE_URL` (Neon), the GitHub OAuth credentials, `AUTH_SECRET`, and `TERRAGON_ENCRYPTION_KEY`; set `USE_FIXTURES=false` for live data. Observability is via platform logs plus the `sync_event` audit table. See [installation.md](./installation.md) for the full setup.

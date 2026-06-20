@@ -1,15 +1,15 @@
-# Terragon — UI Spec (extracted from the prototype)
+# Terragon — UI Reference
 
-Concrete, buildable UI detail pulled **verbatim** from `concept/Mise.html` so Phase 0 reproduces it without re-reading the bundle. Pairs with [`design.md`](./design.md) (intent) and [`prototype-review.md`](./prototype-review.md) (what's real vs decorative). For data shapes see [`/fixtures/seed.ts`](../fixtures/seed.ts).
+The design tokens, typography, presets, interaction constants, and microcopy that define Terragon's look and feel. Pairs with [`design.md`](./design.md) (UX intent).
 
 ## Typography
 
-- **Inter** (the prototype bundles Inter woff2). Load via `next/font/google` Inter; system-sans fallback.
-- Card title 13.5px (13px when `compactCards`); metadata compact; no oversized dashboard type.
+- **Inter** (loaded via `next/font/google`), system-sans fallback.
+- Card title 13.5px (13px in compact density); compact metadata; no oversized dashboard type.
 
 ## Design tokens (light / dark)
 
-CSS custom properties, exactly as in the prototype. Port into the Tailwind theme + `globals.css` (`:root` and `[data-theme="dark"]`).
+CSS custom properties defined in `app/globals.css` (`:root` and `[data-theme="dark"]`) and exposed to Tailwind via `@theme`.
 
 | Token | Light | Dark | Use |
 |-------|-------|------|-----|
@@ -35,52 +35,40 @@ CSS custom properties, exactly as in the prototype. Port into the Tailwind theme
 
 `planned → var(--text-3)` · `in-progress → var(--accent)` · `done → var(--green)` · `backburner → #9ca3af`.
 
-Label and person colors are data, in [`/fixtures/seed.ts`](../fixtures/seed.ts) (`LABELS`, `PEOPLE`).
+Label colors come from each GitHub label; assignee avatar colors are derived deterministically from the login.
 
-## Configurable presets → settings
+## Presets (workspace settings)
 
-The prototype exposes three knobs via props. These should become **workspace/user settings** (extend `workspace_settings` or a user-prefs table — a data-model note for the implementation plan):
+Stored per repository in `workspace_settings`:
 
-- **accent** — swatches `#5b5bd6` (indigo, default) · `#1f8a5b` (green) · `#d97757` (terracotta) · `#111111` (near-black). Applied by setting `--accent` on the root.
+- **accent** — swatches `#5b5bd6` (indigo, default) · `#1f8a5b` (green) · `#d97757` (terracotta) · `#111111` (near-black).
 - **defaultTheme** — `light` (default) | `dark`.
 - **compactCards** — `false` (default) | `true`.
 
 ## Card density
 
-| | Default | `compactCards` |
-|---|---------|----------------|
+| | Default | Compact |
+|---|---------|---------|
 | padding | `11px 12px` | `8px 10px` |
 | title size | `13.5px` | `13px` |
 
-Board cards show: `#number`, title, assignee avatar, labels, milestone — **no description** on the board.
+Board cards show `#number`, title, assignee avatar, labels, milestone — **no description** on the board.
 
-## Interaction constants & behaviors
+## Interaction constants
 
-**Drag & drop** (native HTML5): dragged card opacity `0.4`; on drag start set `dragging` id + `dataTransfer.effectAllowed = "move"`; columns raise border to `--border-strong` while a drag is active; `onDragOver` preventDefault; drop moves the card. (In production the drop fires the label transition + optimistic rollback — architecture §7 — not the prototype's bare `status` set.)
-
-**Toasts**: single slot, auto-dismiss after **2000ms** (reset timer on new toast). Strings: `#142 moved to In Progress` · `Updated 6 issues · synced to GitHub` · `Moved 3 to Backburner · synced` · `Pick a change first` (bulk with no change selected) · `Repository switcher`.
-
-**Command palette** (`cmdk`): toggle on `⌘K` / `Ctrl+K`; autofocus input (~10ms delay). Empty query → actions + first **6** issues; with query → fuzzy match on title + number, capped at **9** results. `↑/↓` move (clamped), `Enter` runs, `Esc` closes. Actions: Create new issue · Go to Board · Go to Grooming · Toggle theme.
-
-**Escape priority**: if palette open → close palette; else if drawer open → close drawer.
-
-**Drawer**: right-side panel (not modal); scrim `--overlay`; inline edits applied immediately to local state (production: round-trip to GitHub). `Esc` closes.
-
-**Create issue**: number = `max(existing) + 1`; defaults `status: planned`, current user as assignee, no milestone, no labels, `updated: "just now"`; prepend to list; open its drawer; switch to Board.
-
-**Grooming bulk**: `applyBulk` requires at least one of status/assignee chosen (else `Pick a change first`); applies to selected rows, stamps `updated: "just now"`, clears selection. Production adds labels/milestone/close and **partial-success** reporting (the prototype always succeeds — prototype-review §gaps).
+- **Drag & drop** (native HTML5): dragged card opacity `0.4`; columns raise their border to `--border-strong` while a drag is active; dropping a card moves it to that column (optimistic, with rollback on failure).
+- **Toasts**: single slot, auto-dismiss after **2000ms** (timer resets on a new toast). Examples: `#142 moved to In Progress` · `Updated 6 issues · synced to GitHub`.
+- **Command palette** (`cmdk`): `⌘K` / `Ctrl+K` toggles; autofocus. Empty query → actions + first **6** issues; with a query → fuzzy match on title + number. `↑/↓` move, `Enter` runs, `Esc` closes. Actions: Go to Board · Go to Grooming · Toggle theme · Create issue.
+- **Keyboard**: `N` (new), `G then B/G/M` (Board/Grooming/Milestones), `/` (focus search), `Esc` (close palette, else drawer). Shortcuts ignore typing in inputs.
+- **Drawer**: right-side panel (not modal); scrim `--overlay`; `Esc` closes. Edits round-trip to GitHub.
+- **Grooming bulk**: requires at least one staged change (else a "Pick a change first" toast); applies to the selected rows and reports per-issue **partial success**.
 
 ## Microcopy
 
-- View subtitles: Board → `acme/platform · execution surface`; Grooming → `Backlog refinement · select rows to bulk edit`.
+- Board subtitle → `<owner>/<repo> · execution surface`; Grooming → `Backlog refinement · select rows to bulk edit`.
 - Empty title fallback → `Untitled issue`.
-- GitHub issue URL pattern → `https://github.com/{owner}/{repo}/issues/{number}`.
-- Comment author in prototype is hardcoded (`Maya Chen`); production uses the authenticated user.
+- Batch result → `N of M updated · #X failed: <reason>`.
 
-## View-model shaping (pattern to keep)
+## View-model shaping
 
-The prototype computes a flat view-model (`renderVals`) that separates state from presentation: columns carry `{ label, dot, count, issues[], drag handlers }`; the selected issue carries every edit handler; grooming rows carry checkbox styling + toggles. Mirror this shape when passing props from Server Components / actions to the UI — it keeps components dumb and the data layer testable.
-
-## Prototype gaps to fix (do NOT copy)
-
-From [`prototype-review.md`](./prototype-review.md): dead nav items (Prep Station / Milestones / My Work / Settings), no auth/repo/GitHub, `moveTo` sets a bare `status` (no label model), bulk limited to status+assignee+backburner, no partial-success, no empty/loading/error states, only `⌘K`/`Esc` bound (add `N`, `G then B/G/M`, `/`).
+The UI renders a single flat presentation shape (`BoardIssue`) produced server-side from either fixtures or live GitHub data, so components stay presentational and the data layer stays testable. See `lib/view/board-issue.ts`.
