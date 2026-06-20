@@ -3,6 +3,7 @@ import {
   fromFixtureIssue,
   fromResolvedIssue,
   groupBoardIssues,
+  groupByMilestone,
   relativeTime,
   type BoardIssue,
 } from "@/lib/view/board-issue";
@@ -72,5 +73,17 @@ describe("board-issue adapters", () => {
 
   it("relativeTime handles invalid input gracefully", () => {
     expect(relativeTime("not-a-date")).toBe("not-a-date");
+  });
+});
+
+describe("groupByMilestone", () => {
+  it("groups by milestone with done counts + a 'No milestone' bucket", () => {
+    const vms: BoardIssue[] = ISSUES.map(fromFixtureIssue);
+    const groups = groupByMilestone(vms);
+    expect(groups.reduce((n, g) => n + g.total, 0)).toBe(vms.length);
+    for (const g of groups) {
+      expect(g.done).toBe(g.issues.filter((i) => i.status === "done").length);
+    }
+    expect(groups.some((g) => g.title === "No milestone")).toBe(true);
   });
 });
