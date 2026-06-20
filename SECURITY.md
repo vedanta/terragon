@@ -4,8 +4,7 @@
 
 Please report security issues **privately** — do not open a public issue for vulnerabilities.
 
-- Use GitHub's [private vulnerability reporting](https://github.com/vedanta/terragon/security/advisories/new), or
-- Email **barooah.vedanta@gmail.com** with details and reproduction steps.
+Use GitHub's [private vulnerability reporting](https://github.com/vedanta/terragon/security/advisories/new) to submit a report with details and reproduction steps.
 
 You'll get an acknowledgement as soon as possible, and we'll work with you on a fix and coordinated disclosure.
 
