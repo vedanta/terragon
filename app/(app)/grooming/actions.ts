@@ -69,6 +69,13 @@ export async function applyBatch(
   });
   const result = await executePlan(client, repo.owner, repo.name, ops);
 
+  if (result.failed.length > 0) {
+    console.error("[terragon] applyBatch partial failure", {
+      count: selection.length,
+      failed: result.failed.length,
+    });
+  }
+
   try {
     await db.insert(syncEvents).values({
       repositoryId: repo.id,

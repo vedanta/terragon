@@ -55,7 +55,8 @@ export async function moveIssue(
     revalidatePath("/board");
     revalidatePath("/grooming");
     return { ok: true };
-  } catch {
+  } catch (err) {
+    console.error("[terragon] moveIssue failed", { issue: issueNumber }, err);
     return {
       ok: false,
       error: `Could not update #${issueNumber} on GitHub.`,
