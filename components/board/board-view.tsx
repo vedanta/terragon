@@ -8,13 +8,16 @@ import { IssueDrawer } from "@/components/issue/issue-drawer";
 import { EmptyState } from "@/components/states/empty-state";
 import { useToast } from "@/components/toast/toast";
 import { moveIssue } from "@/app/(app)/board/actions";
+import { type DrawerMeta } from "@/lib/board-meta";
 
 export function BoardView({
   issues,
   live,
+  meta,
 }: {
   issues: BoardIssue[];
   live: boolean;
+  meta: DrawerMeta;
 }) {
   const [selected, setSelected] = useState<number | null>(null);
   const [dragging, setDragging] = useState<number | null>(null);
@@ -76,7 +79,11 @@ export function BoardView({
           />
         ))}
       </div>
-      <IssueDrawer issue={selectedIssue} onClose={() => setSelected(null)} />
+      <IssueDrawer
+        issue={selectedIssue}
+        onClose={() => setSelected(null)}
+        meta={meta}
+      />
     </>
   );
 }

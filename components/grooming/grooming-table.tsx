@@ -8,9 +8,16 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { IssueDrawer } from "@/components/issue/issue-drawer";
 import { EmptyState } from "@/components/states/empty-state";
 import { useToast } from "@/components/toast/toast";
+import { type DrawerMeta } from "@/lib/board-meta";
 import { BulkActionBar } from "./bulk-action-bar";
 
-export function GroomingTable({ issues }: { issues: BoardIssue[] }) {
+export function GroomingTable({
+  issues,
+  meta,
+}: {
+  issues: BoardIssue[];
+  meta: DrawerMeta;
+}) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [drawer, setDrawer] = useState<number | null>(null);
   const { showToast } = useToast();
@@ -138,7 +145,11 @@ export function GroomingTable({ issues }: { issues: BoardIssue[] }) {
         />
       )}
 
-      <IssueDrawer issue={drawerIssue} onClose={() => setDrawer(null)} />
+      <IssueDrawer
+        issue={drawerIssue}
+        onClose={() => setDrawer(null)}
+        meta={meta}
+      />
     </>
   );
 }
