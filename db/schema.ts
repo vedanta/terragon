@@ -110,3 +110,15 @@ export const workspaceSettings = pgTable("workspace_settings", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
+
+export const syncEvents = pgTable("sync_event", {
+  id: text("id").primaryKey().$defaultFn(uuid),
+  repositoryId: text("repository_id")
+    .notNull()
+    .references(() => repositories.id, { onDelete: "cascade" }),
+  eventType: text("event_type").notNull(),
+  status: text("status").notNull(),
+  payload: text("payload"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
