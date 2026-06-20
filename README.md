@@ -10,7 +10,16 @@ A lightweight, **GitHub-native** project-management app for small teams. Terrago
 
 ## Status
 
-**Pre-implementation** — this repo currently holds the planning artifacts (specs, architecture, design, and delivery plan). The application is built in public as a sequence of grouped, human-reviewed PRs.
+**MVP complete** — built in public across groups G1–G9 (each a human-reviewed PR). GitHub login, the live Kanban board, drag-to-change-status, inline issue editing, and batch grooming all work against real GitHub Issues. Set `USE_FIXTURES=false` (with a selected repository) to run against your own repo; the default shows seeded demo data.
+
+## Run
+
+```bash
+npm install
+npm run dev   # http://localhost:3000
+```
+
+Configure auth/DB via `.env` (see `.env.example`): GitHub OAuth App, a Neon Postgres `DATABASE_URL`, `AUTH_SECRET`, and `TERRAGON_ENCRYPTION_KEY`. Run `npm run db:migrate` to apply the schema.
 
 ## Docs
 

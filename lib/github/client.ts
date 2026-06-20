@@ -185,6 +185,14 @@ export class GitHubClient {
     return all;
   }
 
+  /** The authenticated user's GitHub login. */
+  async getViewerLogin(): Promise<string> {
+    const d = await this.withBackoff(() =>
+      this.gql<{ viewer: { login: string } }>(`query { viewer { login } }`),
+    );
+    return d.viewer.login;
+  }
+
   /** Repo labels, open milestones, and assignable users (for the drawer pickers). */
   async getRepoMetadata(owner: string, repo: string): Promise<RepoMetadata> {
     const d = await this.withBackoff(() =>

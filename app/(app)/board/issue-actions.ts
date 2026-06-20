@@ -49,7 +49,8 @@ async function withClient(
   try {
     await run(ctx.client, ctx.owner, ctx.repo);
     return revalidate();
-  } catch {
+  } catch (err) {
+    console.error("[terragon] issue edit failed", { issue: issueNumber }, err);
     return { ok: false, error: `Could not update #${issueNumber} on GitHub.` };
   }
 }

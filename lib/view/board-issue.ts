@@ -117,6 +117,30 @@ export function fromResolvedIssue(i: ResolvedIssue): BoardIssue {
   };
 }
 
+export interface MilestoneGroup {
+  title: string;
+  total: number;
+  done: number;
+  issues: BoardIssue[];
+}
+
+/** Group issues by milestone (null → "No milestone"), with done counts. */
+export function groupByMilestone(issues: BoardIssue[]): MilestoneGroup[] {
+  const map = new Map<string, BoardIssue[]>();
+  for (const i of issues) {
+    const key = i.milestone ?? "No milestone";
+    const list = map.get(key);
+    if (list) list.push(i);
+    else map.set(key, [i]);
+  }
+  return [...map.entries()].map(([title, list]) => ({
+    title,
+    total: list.length,
+    done: list.filter((i) => i.status === "done").length,
+    issues: list,
+  }));
+}
+
 export function groupBoardIssues(issues: BoardIssue[]): BoardColumn[] {
   return STATUS_ORDER.map((key) => {
     const list = issues.filter((i) => i.status === key);
