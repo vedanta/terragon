@@ -1,6 +1,6 @@
 import { Octokit } from "octokit";
 import pLimit from "p-limit";
-import type { Page, RawIssue } from "./types";
+import type { Page, RawIssue, RepoMetadata } from "./types";
 import type { TransitionPlan } from "@/lib/status/transition";
 
 /* ---- GraphQL response shapes (typed to avoid `any`) ---- */
@@ -24,6 +24,16 @@ interface GqlIssuesResponse {
     issues: {
       pageInfo: { hasNextPage: boolean; endCursor: string | null };
       nodes: GqlIssueNode[];
+    };
+  };
+}
+
+interface GqlMetaResponse {
+  repository: {
+    labels: { nodes: { name: string; color: string }[] };
+    milestones: { nodes: { number: number; title: string }[] };
+    assignableUsers: {
+      nodes: { login: string; name: string | null; avatarUrl: string }[];
     };
   };
 }
@@ -60,6 +70,24 @@ export interface RestOps {
     issue: number,
     state: "open" | "closed",
   ): Promise<void>;
+  updateIssue(
+    owner: string,
+    repo: string,
+    issue: number,
+    fields: { title?: string; body?: string },
+  ): Promise<void>;
+  setAssignees(
+    owner: string,
+    repo: string,
+    issue: number,
+    logins: string[],
+  ): Promise<void>;
+  setMilestone(
+    owner: string,
+    repo: string,
+    issue: number,
+    milestone: number | null,
+  ): Promise<void>;
 }
 
 const ISSUES_QUERY = `
@@ -74,6 +102,16 @@ const ISSUES_QUERY = `
           milestone { title }
         }
       }
+    }
+  }
+`;
+
+const META_QUERY = `
+  query ($owner: String!, $repo: String!) {
+    repository(owner: $owner, name: $repo) {
+      labels(first: 100) { nodes { name color } }
+      milestones(first: 50, states: [OPEN]) { nodes { number title } }
+      assignableUsers(first: 100) { nodes { login name avatarUrl } }
     }
   }
 `;
@@ -147,6 +185,28 @@ export class GitHubClient {
     return all;
   }
 
+  /** Repo labels, open milestones, and assignable users (for the drawer pickers). */
+  async getRepoMetadata(owner: string, repo: string): Promise<RepoMetadata> {
+    const d = await this.withBackoff(() =>
+      this.gql<GqlMetaResponse>(META_QUERY, { owner, repo }),
+    );
+    return {
+      labels: d.repository.labels.nodes.map((l) => ({
+        name: l.name,
+        color: l.color,
+      })),
+      milestones: d.repository.milestones.nodes.map((m) => ({
+        number: m.number,
+        title: m.title,
+      })),
+      assignees: d.repository.assignableUsers.nodes.map((a) => ({
+        login: a.login,
+        name: a.name,
+        avatarUrl: a.avatarUrl,
+      })),
+    };
+  }
+
   /** Create any of the given labels that don't already exist on the repo. */
   async ensureLabels(
     owner: string,
@@ -190,6 +250,61 @@ export class GitHubClient {
         this.rest.setIssueState(owner, repo, issue, "open"),
       );
     }
+  }
+
+  updateIssue(
+    owner: string,
+    repo: string,
+    issue: number,
+    fields: { title?: string; body?: string },
+  ): Promise<void> {
+    return this.withBackoff(() =>
+      this.rest.updateIssue(owner, repo, issue, fields),
+    );
+  }
+
+  setAssignees(
+    owner: string,
+    repo: string,
+    issue: number,
+    logins: string[],
+  ): Promise<void> {
+    return this.withBackoff(() =>
+      this.rest.setAssignees(owner, repo, issue, logins),
+    );
+  }
+
+  setMilestone(
+    owner: string,
+    repo: string,
+    issue: number,
+    milestone: number | null,
+  ): Promise<void> {
+    return this.withBackoff(() =>
+      this.rest.setMilestone(owner, repo, issue, milestone),
+    );
+  }
+
+  async addLabel(
+    owner: string,
+    repo: string,
+    issue: number,
+    label: string,
+  ): Promise<void> {
+    await this.withBackoff(() =>
+      this.rest.addLabels(owner, repo, issue, [label]),
+    );
+  }
+
+  async removeLabel(
+    owner: string,
+    repo: string,
+    issue: number,
+    label: string,
+  ): Promise<void> {
+    await this.withBackoff(() =>
+      this.rest.removeLabel(owner, repo, issue, label),
+    );
   }
 
   /** Run a task through the shared concurrency limiter. */
@@ -237,6 +352,15 @@ function restFromOctokit(ok: Octokit): RestOps {
     async setIssueState(owner, repo, issue_number, state) {
       await ok.rest.issues.update({ owner, repo, issue_number, state });
     },
+    async updateIssue(owner, repo, issue_number, fields) {
+      await ok.rest.issues.update({ owner, repo, issue_number, ...fields });
+    },
+    async setAssignees(owner, repo, issue_number, assignees) {
+      await ok.rest.issues.update({ owner, repo, issue_number, assignees });
+    },
+    async setMilestone(owner, repo, issue_number, milestone) {
+      await ok.rest.issues.update({ owner, repo, issue_number, milestone });
+    },
   };
 }
 
@@ -250,6 +374,9 @@ function throwingRest(): RestOps {
     addLabels: fail,
     removeLabel: fail,
     setIssueState: fail,
+    updateIssue: fail,
+    setAssignees: fail,
+    setMilestone: fail,
   };
 }
 

@@ -19,6 +19,9 @@ function recordingRest(over: Partial<RestOps> = {}) {
     setIssueState: vi.fn(async (_o, _r, n, state) => {
       calls.push(`state:${state}@${n}`);
     }),
+    updateIssue: vi.fn(),
+    setAssignees: vi.fn(),
+    setMilestone: vi.fn(),
     ...over,
   };
   return { rest, calls };

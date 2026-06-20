@@ -22,3 +22,25 @@ export interface Page<T> {
   endCursor: string | null;
   hasNextPage: boolean;
 }
+
+export interface RepoLabel {
+  name: string;
+  color: string;
+}
+
+export interface RepoMilestone {
+  number: number;
+  title: string;
+}
+
+export interface RepoAssignee {
+  login: string;
+  name: string | null;
+  avatarUrl: string;
+}
+
+export interface RepoMetadata {
+  labels: RepoLabel[];
+  milestones: RepoMilestone[];
+  assignees: RepoAssignee[];
+}
