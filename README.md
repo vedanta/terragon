@@ -123,6 +123,10 @@ Deferred / planned (see open issues): a dedicated create-issue flow, deep-linkin
 
 ## License
 
-_To be decided._
+**Business Source License 1.1** (BUSL-1.1) — see [`LICENSE`](LICENSE). © 2026 Vedanta Barooah.
 
-<!-- TODO(license): choose MIT / Apache-2.0 / source-available and add a LICENSE file -->
+The source is available: you may read, modify, self-host, and make permitted production use of Terragon. Offering it to third parties as a competing **hosted/managed service** is reserved to the licensor. On the **Change Date (2030-06-20)** each released version converts to the **Apache License 2.0**. For other arrangements, contact barooah.vedanta@gmail.com.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md), our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md), and the [security policy](SECURITY.md).
