@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { type BoardIssue } from "@/lib/view/board-issue";
 import { useToast } from "@/components/toast/toast";
+import { OPEN_PALETTE_EVENT } from "./events";
 
 export function CommandPalette({ issues }: { issues: BoardIssue[] }) {
   const [open, setOpen] = useState(false);
@@ -18,8 +19,13 @@ export function CommandPalette({ issues }: { issues: BoardIssue[] }) {
         setOpen((o) => !o);
       }
     };
+    const onOpen = () => setOpen(true);
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    window.addEventListener(OPEN_PALETTE_EVENT, onOpen);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener(OPEN_PALETTE_EVENT, onOpen);
+    };
   }, []);
 
   function go(path: string) {
