@@ -104,6 +104,7 @@ export function fromResolvedIssue(i: ResolvedIssue): BoardIssue {
           name: a.name ?? a.login,
           initials: initials(a.name ?? a.login),
           color: colorFor(a.login),
+          avatarUrl: a.avatarUrl,
         }
       : null,
     assigneeLogin: a?.login ?? null,
