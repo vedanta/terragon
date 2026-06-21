@@ -1,10 +1,17 @@
 import { getBoardData } from "@/lib/board-data";
-import { groupBoardIssues } from "@/lib/view/board-issue";
-import { dashboardStats, statusDistribution } from "@/lib/view/dashboard";
+import { groupBoardIssues, groupByMilestone } from "@/lib/view/board-issue";
+import {
+  dashboardStats,
+  statusDistribution,
+  workloadByAssignee,
+  workByLabel,
+} from "@/lib/view/dashboard";
 import { type StatusKey } from "@/fixtures/seed";
 import { IssueList } from "@/components/views/issue-list";
 import { StatCards } from "@/components/dashboard/stat-cards";
 import { StatusBar } from "@/components/dashboard/status-bar";
+import { Breakdown } from "@/components/dashboard/breakdown";
+import { MilestoneProgress } from "@/components/dashboard/milestone-progress";
 
 const SECTIONS: { title: string; key: StatusKey }[] = [
   { title: "Ready to Start", key: "planned" },
@@ -17,6 +24,9 @@ export default async function DashboardPage() {
   const { issues } = await getBoardData();
   const stats = dashboardStats(issues);
   const distribution = statusDistribution(issues);
+  const assignees = workloadByAssignee(issues);
+  const labels = workByLabel(issues);
+  const milestones = groupByMilestone(issues).sort((a, b) => b.total - a.total);
   const columns = groupBoardIssues(issues);
   const by = (k: StatusKey) => columns.find((c) => c.key === k)?.issues ?? [];
 
@@ -27,7 +37,7 @@ export default async function DashboardPage() {
       </h1>
       <p className="mt-0.5 text-[13px] text-fg-muted">Your work at a glance</p>
 
-      <div className="mt-6 flex max-w-4xl flex-col gap-6">
+      <div className="mt-6 flex max-w-5xl flex-col gap-6">
         <StatCards stats={stats} />
 
         {stats.total > 0 && (
@@ -37,6 +47,18 @@ export default async function DashboardPage() {
             </h2>
             <StatusBar segments={distribution} />
           </section>
+        )}
+
+        {stats.total > 0 && (
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <Breakdown
+              title="Workload by assignee"
+              rows={assignees}
+              empty="No open issues."
+            />
+            <Breakdown title="Work by label" rows={labels} empty="No labels." />
+            <MilestoneProgress groups={milestones} />
+          </div>
         )}
 
         {SECTIONS.map((s) => {
