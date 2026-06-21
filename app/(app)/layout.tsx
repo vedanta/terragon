@@ -4,6 +4,7 @@ import { ToastProvider } from "@/components/toast/toast";
 import { CommandPalette } from "@/components/command-palette/command-palette";
 import { MobileNav } from "@/components/app-shell/mobile-nav";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
+import { ShortcutsHelp } from "@/components/help/shortcuts-help";
 import { getBoardData } from "@/lib/board-data";
 
 export default async function AppLayout({
@@ -26,6 +27,7 @@ export default async function AppLayout({
       </div>
       <CommandPalette issues={issues} />
       <KeyboardShortcuts />
+      <ShortcutsHelp />
     </ToastProvider>
   );
 }
