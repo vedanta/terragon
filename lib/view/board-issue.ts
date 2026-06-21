@@ -22,6 +22,8 @@ export interface BoardIssue {
   labels: Label[];
   milestone: string | null;
   updated: string;
+  /** Sortable recency key (higher = newer). Comparable only within one source. */
+  updatedRank: number;
   description: string;
   url: string;
   comments: Comment[];
@@ -58,6 +60,25 @@ function initials(name: string): string {
   return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?";
 }
 
+const RELATIVE_UNITS: Record<string, number> = {
+  m: 60,
+  h: 3600,
+  d: 86400,
+  w: 604800,
+  mo: 2592000,
+};
+
+/**
+ * Inverse of {@link relativeTime} for sorting: a display string like "2h ago"
+ * → seconds-ago (0 for "just now"). Unparseable input sorts as very old.
+ */
+export function parseRelativeSeconds(s: string): number {
+  if (/just now/i.test(s)) return 0;
+  const m = s.match(/(\d+)\s*(mo|[mhdw])/i);
+  if (!m) return Number.MAX_SAFE_INTEGER;
+  return Number(m[1]) * (RELATIVE_UNITS[m[2].toLowerCase()] ?? 1);
+}
+
 export function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return iso;
@@ -85,6 +106,7 @@ export function fromFixtureIssue(i: Issue): BoardIssue {
     labels: i.labels.map((k) => LABELS[k]),
     milestone: i.milestone,
     updated: i.updated,
+    updatedRank: -parseRelativeSeconds(i.updated),
     description: i.description,
     url: `https://github.com/acme/platform/issues/${i.number}`,
     comments: i.comments,
@@ -111,6 +133,7 @@ export function fromResolvedIssue(i: ResolvedIssue): BoardIssue {
     labels: i.labels.map((name) => ({ name, color: colorFor(name) })),
     milestone: i.milestone,
     updated: relativeTime(i.updatedAt),
+    updatedRank: Date.parse(i.updatedAt) || 0,
     description: i.body,
     url: i.url,
     comments: [],

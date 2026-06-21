@@ -6,6 +6,7 @@ import {
   type FilterOptions,
   isFilterActive,
 } from "@/lib/view/board-filter";
+import { SORTS, type SortKey } from "@/lib/view/board-sort";
 
 function FilterSelect({
   placeholder,
@@ -41,12 +42,16 @@ export function BoardFilters({
   options,
   filter,
   onChange,
+  sort,
+  onSortChange,
   shown,
   total,
 }: {
   options: FilterOptions;
   filter: BoardFilter;
   onChange: (filter: BoardFilter) => void;
+  sort: SortKey;
+  onSortChange: (sort: SortKey) => void;
   shown: number;
   total: number;
 }) {
@@ -88,6 +93,21 @@ export function BoardFilters({
           </button>
         </>
       )}
+      <label className="ml-auto flex items-center gap-1.5 text-[12px] text-fg-subtle">
+        Sort
+        <select
+          aria-label="Sort issues"
+          value={sort}
+          onChange={(e) => onSortChange(e.target.value as SortKey)}
+          className="h-8 rounded-lg border border-border bg-surface px-2 text-[13px] text-fg hover:border-border-strong focus:border-accent focus:outline-none"
+        >
+          {SORTS.map((s) => (
+            <option key={s.key} value={s.key}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+      </label>
     </div>
   );
 }
