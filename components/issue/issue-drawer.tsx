@@ -8,6 +8,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { LabelChip } from "@/components/ui/label-chip";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useToast } from "@/components/toast/toast";
+import { useProgress } from "@/components/progress/use-progress";
 import { moveIssue } from "@/app/(app)/board/actions";
 import {
   saveIssueText,
@@ -45,7 +46,8 @@ function DrawerContent({
   issue: BoardIssue;
   meta: DrawerMeta;
 }) {
-  const [, start] = useTransition();
+  const [isPending, start] = useTransition();
+  useProgress(isPending);
   const { showToast } = useToast();
 
   function run(fn: () => Promise<EditResult>, okMsg?: string) {

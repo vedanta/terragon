@@ -8,6 +8,7 @@ import {
   EMPTY_FILTER,
   type BoardFilter,
 } from "@/lib/view/board-filter";
+import { useProgress } from "@/components/progress/use-progress";
 import { STATUS, type StatusKey } from "@/fixtures/seed";
 import { BoardColumn } from "./board-column";
 import { BoardFilters } from "./board-filters";
@@ -29,7 +30,8 @@ export function BoardView({
   const [selected, setSelected] = useState<number | null>(null);
   const [dragging, setDragging] = useState<number | null>(null);
   const [filter, setFilter] = useState<BoardFilter>(EMPTY_FILTER);
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
+  useProgress(isPending);
   const { showToast } = useToast();
   const [optimistic, applyOptimistic] = useOptimistic(
     issues,

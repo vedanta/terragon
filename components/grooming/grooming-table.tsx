@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { IssueDrawer } from "@/components/issue/issue-drawer";
 import { EmptyState } from "@/components/states/empty-state";
 import { useToast } from "@/components/toast/toast";
+import { useProgress } from "@/components/progress/use-progress";
 import { type DrawerMeta } from "@/lib/board-meta";
 import { applyBatch } from "@/app/(app)/grooming/actions";
 import {
@@ -29,6 +30,7 @@ export function GroomingTable({
   const [drawer, setDrawer] = useState<number | null>(null);
   const [result, setResult] = useState<BatchResult | null>(null);
   const [isPending, startTransition] = useTransition();
+  useProgress(isPending);
   const { showToast } = useToast();
 
   if (issues.length === 0) {
