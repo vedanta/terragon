@@ -5,7 +5,7 @@ import authConfig from "@/auth.config";
 const { auth } = NextAuth(authConfig);
 
 const PROTECTED = [
-  "/prep",
+  "/dashboard",
   "/board",
   "/grooming",
   "/milestones",
