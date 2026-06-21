@@ -3,8 +3,9 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast/toast";
+import { openCommandPalette } from "@/components/command-palette/events";
 
-/** Global shortcuts: `N` new, `G then B/G/M` nav, `/` focus search. (⌘K is the palette.) */
+/** Global shortcuts: `N` new, `G then B/G/M` nav, `/` open palette. (⌘K also opens it.) */
 export function KeyboardShortcuts() {
   const router = useRouter();
   const { showToast } = useToast();
@@ -42,7 +43,7 @@ export function KeyboardShortcuts() {
       }
       if (k === "/") {
         e.preventDefault();
-        document.getElementById("global-search")?.focus();
+        openCommandPalette();
         return;
       }
       if (k === "n") {
