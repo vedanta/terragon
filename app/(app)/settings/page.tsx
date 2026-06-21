@@ -1,9 +1,10 @@
 import { auth } from "@/auth";
 import { getGithubToken } from "@/lib/github-token";
 import { listUserRepos, type GitHubRepo } from "@/lib/github-repos";
+import { getCurrentRepo } from "@/lib/workspace";
 import { ErrorBanner } from "@/components/states/error-banner";
 import { EmptyState } from "@/components/states/empty-state";
-import { selectRepo } from "./actions";
+import { RepoPicker } from "@/components/settings/repo-picker";
 import { WorkspaceSection } from "./workspace-section";
 
 export default async function SettingsPage() {
@@ -11,8 +12,10 @@ export default async function SettingsPage() {
 
   let repos: GitHubRepo[] = [];
   let error: string | null = null;
+  let activeFullName: string | null = null;
 
   if (session?.user) {
+    activeFullName = (await getCurrentRepo(session.user.id))?.fullName ?? null;
     try {
       const token = await getGithubToken(session.user.id);
       if (!token) {
@@ -47,45 +50,7 @@ export default async function SettingsPage() {
         )}
 
         {repos.length > 0 && (
-          <ul className="overflow-hidden rounded-xl border border-border">
-            {repos.map((r) => (
-              <li
-                key={r.id}
-                className="flex items-center justify-between border-b border-border px-4 py-2.5 last:border-b-0 hover:bg-hover"
-              >
-                <span className="flex items-center gap-2 text-[13px] text-fg">
-                  {r.fullName}
-                  {r.private && (
-                    <span className="rounded bg-hover px-1.5 py-0.5 text-[11px] text-fg-subtle">
-                      private
-                    </span>
-                  )}
-                </span>
-                <form action={selectRepo}>
-                  <input type="hidden" name="id" value={r.id} />
-                  <input type="hidden" name="owner" value={r.owner} />
-                  <input type="hidden" name="name" value={r.name} />
-                  <input type="hidden" name="fullName" value={r.fullName} />
-                  <input
-                    type="hidden"
-                    name="private"
-                    value={String(r.private)}
-                  />
-                  <input
-                    type="hidden"
-                    name="defaultBranch"
-                    value={r.defaultBranch}
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-lg border border-border px-3 py-1 text-[13px] text-fg hover:bg-bg"
-                  >
-                    Select
-                  </button>
-                </form>
-              </li>
-            ))}
-          </ul>
+          <RepoPicker repos={repos} activeFullName={activeFullName} />
         )}
       </div>
 
