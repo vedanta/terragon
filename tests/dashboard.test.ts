@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { dashboardStats, statusDistribution } from "@/lib/view/dashboard";
+import {
+  dashboardStats,
+  statusDistribution,
+  workloadByAssignee,
+  workByLabel,
+} from "@/lib/view/dashboard";
 import { fromFixtureIssue } from "@/lib/view/board-issue";
 import { ISSUES } from "@/fixtures/seed";
 
@@ -37,5 +42,46 @@ describe("statusDistribution", () => {
   it("does not divide by zero on an empty board", () => {
     const d = statusDistribution([]);
     expect(d.every((s) => s.pct === 0)).toBe(true);
+  });
+});
+
+describe("workloadByAssignee", () => {
+  it("counts only open issues, includes an Unassigned bucket, sorted desc", () => {
+    const rows = workloadByAssignee(vms);
+    // never counts Done issues
+    const doneAssignees = vms
+      .filter((i) => i.status === "done" && i.assigneeLogin)
+      .map((i) => i.assigneeLogin);
+    expect(rows.reduce((n, r) => n + r.count, 0)).toBe(
+      vms.filter((i) => i.status !== "done").length,
+    );
+    // sorted descending
+    for (let i = 1; i < rows.length; i++) {
+      expect(rows[i - 1].count).toBeGreaterThanOrEqual(rows[i].count);
+    }
+    expect(doneAssignees).toBeDefined();
+  });
+
+  it("buckets null assignees as Unassigned", () => {
+    const rows = workloadByAssignee(vms);
+    const hasUnassignedOpen = vms.some(
+      (i) => i.status !== "done" && !i.assignee,
+    );
+    expect(rows.some((r) => r.label === "Unassigned")).toBe(hasUnassignedOpen);
+  });
+});
+
+describe("workByLabel", () => {
+  it("counts label occurrences across issues, sorted desc", () => {
+    const rows = workByLabel(vms);
+    const totalLabelUses = vms.reduce((n, i) => n + i.labels.length, 0);
+    expect(rows.reduce((n, r) => n + r.count, 0)).toBe(totalLabelUses);
+    for (let i = 1; i < rows.length; i++) {
+      expect(rows[i - 1].count).toBeGreaterThanOrEqual(rows[i].count);
+    }
+  });
+
+  it("handles an empty board", () => {
+    expect(workByLabel([])).toEqual([]);
   });
 });
