@@ -8,6 +8,11 @@ import {
   EMPTY_FILTER,
   type BoardFilter,
 } from "@/lib/view/board-filter";
+import {
+  sortBoardIssues,
+  DEFAULT_SORT,
+  type SortKey,
+} from "@/lib/view/board-sort";
 import { useProgress } from "@/components/progress/use-progress";
 import { STATUS, type StatusKey } from "@/fixtures/seed";
 import { BoardColumn } from "./board-column";
@@ -30,6 +35,7 @@ export function BoardView({
   const [selected, setSelected] = useState<number | null>(null);
   const [dragging, setDragging] = useState<number | null>(null);
   const [filter, setFilter] = useState<BoardFilter>(EMPTY_FILTER);
+  const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
   const [isPending, startTransition] = useTransition();
   useProgress(isPending);
   const { showToast } = useToast();
@@ -76,7 +82,7 @@ export function BoardView({
   }
 
   const filtered = applyBoardFilter(optimistic, filter);
-  const columns = groupBoardIssues(filtered);
+  const columns = groupBoardIssues(sortBoardIssues(filtered, sort));
   const selectedIssue = optimistic.find((i) => i.number === selected) ?? null;
 
   return (
@@ -86,6 +92,8 @@ export function BoardView({
           options={options}
           filter={filter}
           onChange={setFilter}
+          sort={sort}
+          onSortChange={setSort}
           shown={filtered.length}
           total={optimistic.length}
         />
