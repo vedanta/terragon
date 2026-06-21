@@ -3,6 +3,9 @@
 /* Dark mode driven by [data-theme="dark"] (set on <html>), not media query. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/* Summary board cards driven by [data-card-view="summary"] on <html>. */
+@custom-variant card-summary (&:where([data-card-view="summary"] *));
+
 /* Design tokens — exact values from docs/ui-spec.md (light). */
 :root {
   --bg: #ffffff;

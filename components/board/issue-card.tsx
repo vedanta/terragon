@@ -32,13 +32,13 @@ export function IssueCard({
         {issue.title || "Untitled issue"}
       </span>
       {issue.labels.length > 0 && (
-        <span className="flex flex-wrap gap-1.5">
+        <span className="flex flex-wrap gap-1.5 card-summary:hidden">
           {issue.labels.map((l) => (
             <LabelChip key={l.name} label={l} />
           ))}
         </span>
       )}
-      <span className="mt-0.5 flex items-center gap-2 text-[12px] text-fg-muted">
+      <span className="mt-0.5 flex items-center gap-2 text-[12px] text-fg-muted card-summary:hidden">
         {person ? (
           <Avatar person={person} size={18} />
         ) : (

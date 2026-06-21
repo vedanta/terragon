@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   description: "The calm execution layer for teams that live in GitHub.",
 };
 
-// Apply the persisted theme before paint to avoid a flash / hydration mismatch.
-const themeScript = `(function(){try{var t=localStorage.getItem('terragon-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
+// Apply persisted theme + card-view before paint to avoid a flash / hydration mismatch.
+const prefsScript = `(function(){try{var t=localStorage.getItem('terragon-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}var c=localStorage.getItem('terragon-card-view');if(c==='summary'||c==='detailed'){document.documentElement.setAttribute('data-card-view',c);}}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -21,11 +21,12 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="light"
+      data-card-view="detailed"
       className={inter.variable}
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: prefsScript }} />
       </head>
       <body>{children}</body>
     </html>
