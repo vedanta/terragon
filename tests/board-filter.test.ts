@@ -49,7 +49,10 @@ describe("applyBoardFilter", () => {
   });
 
   it("filters to unassigned issues", () => {
-    const out = applyBoardFilter(vms, { ...EMPTY_FILTER, assignee: UNASSIGNED });
+    const out = applyBoardFilter(vms, {
+      ...EMPTY_FILTER,
+      assignee: UNASSIGNED,
+    });
     expect(out.every((i) => i.assigneeLogin === null)).toBe(true);
   });
 
