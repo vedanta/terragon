@@ -5,7 +5,7 @@
 <h1 align="center">Terragon</h1>
 
 <p align="center">
-  The calm execution layer for teams that live in GitHub.
+  Turn GitHub Issues into a Kanban board.
 </p>
 
 Terragon turns **GitHub Issues into a clean Kanban + grooming workspace** — without replacing GitHub as the source of truth. It sits in the gap between raw GitHub Issues and heavyweight tools like Jira or Linear: enough structure to actually run the work, nothing you have to migrate into.
