@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast/toast";
 import { openCommandPalette } from "@/components/command-palette/events";
+import { openShortcutsHelp } from "@/components/help/events";
 
 /** Global shortcuts: `N` new, `G then B/G/M` nav, `/` open palette. (⌘K also opens it.) */
 export function KeyboardShortcuts() {
@@ -44,6 +45,11 @@ export function KeyboardShortcuts() {
       if (k === "/") {
         e.preventDefault();
         openCommandPalette();
+        return;
+      }
+      if (k === "?") {
+        e.preventDefault();
+        openShortcutsHelp();
         return;
       }
       if (k === "n") {
