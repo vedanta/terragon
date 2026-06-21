@@ -12,7 +12,12 @@ Terragon turns **GitHub Issues into a clean Kanban + grooming workspace** — wi
 
 > GitHub Issues are the task system. Terragon is the execution surface.
 
-<!-- TODO(screenshots): board · grooming · issue drawer -->
+![Terragon board](docs/screenshots/board.png)
+
+<p align="center">
+  <img src="docs/screenshots/drawer.png" alt="Issue drawer" width="49%" />
+  <img src="docs/screenshots/grooming.png" alt="Grooming with batch actions" width="49%" />
+</p>
 
 ## Features
 
