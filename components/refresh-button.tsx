@@ -1,18 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
+import { useProgress } from "@/components/progress/use-progress";
 
 export function RefreshButton() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [spinning, setSpinning] = useState(false);
+  useProgress(isPending);
 
   function refresh() {
-    setSpinning(true);
     startTransition(() => {
       router.refresh();
-      setTimeout(() => setSpinning(false), 400);
     });
   }
 
@@ -23,7 +22,7 @@ export function RefreshButton() {
       disabled={isPending}
       className="rounded-lg border border-border px-2.5 py-1.5 text-[13px] text-fg-muted hover:bg-hover disabled:opacity-60"
     >
-      {spinning ? "Refreshing…" : "Refresh"}
+      {isPending ? "Refreshing…" : "Refresh"}
     </button>
   );
 }
