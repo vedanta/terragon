@@ -7,17 +7,28 @@ import { db } from "@/db";
 import { repositories, userRepositories } from "@/db/schema";
 import { getCurrentRepo, saveWorkspaceConfig } from "@/lib/workspace";
 
-/** Upsert the chosen repository and mark it most-recently-opened for the user. */
-export async function selectRepo(formData: FormData) {
+export interface RepoChoice {
+  githubRepoId: string;
+  owner: string;
+  name: string;
+  fullName: string;
+  private: boolean;
+  defaultBranch: string;
+}
+
+/** Upsert a repo + mark it the user's active (most-recently-opened) repository. */
+export async function chooseRepo(repo: RepoChoice) {
   const session = await auth();
   if (!session?.user) return;
 
-  const githubRepoId = String(formData.get("id"));
-  const owner = String(formData.get("owner"));
-  const name = String(formData.get("name"));
-  const fullName = String(formData.get("fullName"));
-  const isPrivate = formData.get("private") === "true";
-  const defaultBranch = String(formData.get("defaultBranch") || "main");
+  const {
+    githubRepoId,
+    owner,
+    name,
+    fullName,
+    private: isPrivate,
+    defaultBranch,
+  } = repo;
 
   const existing = await db
     .select({ id: repositories.id })
@@ -79,6 +90,9 @@ export async function selectRepo(formData: FormData) {
   }
 
   revalidatePath("/settings");
+  revalidatePath("/board");
+  revalidatePath("/grooming");
+  revalidatePath("/dashboard");
 }
 
 /** Persist the workspace's status-label names + auto-close behavior. */
