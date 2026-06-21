@@ -22,6 +22,8 @@ export interface Person {
   name: string;
   initials: string;
   color: string;
+  /** GitHub avatar URL (live data only; fixtures fall back to the initials circle). */
+  avatarUrl?: string;
 }
 
 export interface Label {
