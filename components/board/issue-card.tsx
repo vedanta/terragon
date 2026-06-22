@@ -25,10 +25,10 @@ export function IssueCard({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       style={{ opacity: dragging ? 0.4 : 1 }}
-      className="flex w-full cursor-grab flex-col gap-2 rounded-lg border border-border bg-surface p-3 text-left shadow-[var(--shadow)] hover:border-border-strong active:cursor-grabbing"
+      className="flex w-full cursor-grab flex-col gap-2 rounded-lg border border-border bg-surface px-3 py-[11px] text-left shadow-[var(--shadow)] hover:border-border-strong active:cursor-grabbing compact:gap-1.5 compact:px-2.5 compact:py-2"
     >
       <span className="text-[12px] text-fg-subtle">#{issue.number}</span>
-      <span className="text-[13.5px] font-medium leading-snug text-fg">
+      <span className="text-[13.5px] font-medium leading-snug text-fg compact:text-[13px]">
         {issue.title || "Untitled issue"}
       </span>
       {issue.labels.length > 0 && (
