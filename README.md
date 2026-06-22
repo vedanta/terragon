@@ -8,6 +8,14 @@
   Turn GitHub Issues into a Kanban board.
 </p>
 
+<p align="center">
+  <a href="https://vedanta.github.io/terragon/"><strong>🌐 Website</strong></a>
+  ·
+  <a href="https://github.com/vedanta/terragon/releases">Releases</a>
+  ·
+  <a href="#quickstart">Quickstart</a>
+</p>
+
 Terragon turns **GitHub Issues into a clean Kanban + grooming workspace** — without replacing GitHub as the source of truth. It sits in the gap between raw GitHub Issues and heavyweight tools like Jira or Linear: enough structure to actually run the work, nothing you have to migrate into.
 
 > GitHub Issues are the task system. Terragon is the execution surface.

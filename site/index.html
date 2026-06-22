@@ -192,7 +192,18 @@
       /* Hero */
       .hero {
         text-align: center;
-        padding: 96px 0 56px;
+        padding: 88px 0 56px;
+      }
+      .hero-logo {
+        width: 84px;
+        height: 84px;
+        border-radius: 20px;
+        margin: 0 auto 24px;
+        display: block;
+        box-shadow:
+          0 0 0 1px var(--border),
+          0 18px 48px var(--accent-soft),
+          var(--shadow-lg);
       }
       .eyebrow {
         display: inline-flex;
@@ -463,6 +474,7 @@
     <main id="top">
       <!-- Hero -->
       <div class="hero wrap">
+        <img class="hero-logo" src="assets/logo.png" alt="Terragon logo" />
         <span class="eyebrow">● GitHub-native · open source</span>
         <h1>A Kanban board and grooming workspace for GitHub Issues</h1>
         <p class="lede">
