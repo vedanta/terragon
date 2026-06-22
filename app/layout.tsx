@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 // Apply persisted theme + card-view before paint to avoid a flash / hydration mismatch.
 // Theme: stored value is the mode (light|dark|system); unset/system → follow the OS.
-const prefsScript = `(function(){try{var t=localStorage.getItem('terragon-theme');var dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=t==='dark'?'dark':t==='light'?'light':(dark?'dark':'light');document.documentElement.setAttribute('data-theme',resolved);var c=localStorage.getItem('terragon-card-view');if(c==='summary'||c==='detailed'){document.documentElement.setAttribute('data-card-view',c);}}catch(e){}})();`;
+const prefsScript = `(function(){try{var t=localStorage.getItem('terragon-theme');var dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=t==='dark'?'dark':t==='light'?'light':(dark?'dark':'light');document.documentElement.setAttribute('data-theme',resolved);var c=localStorage.getItem('terragon-card-view');if(c==='summary'||c==='detailed'){document.documentElement.setAttribute('data-card-view',c);}var d=localStorage.getItem('terragon-density');if(d==='compact'||d==='comfortable'){document.documentElement.setAttribute('data-density',d);}}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -24,6 +24,7 @@ export default function RootLayout({
       lang="en"
       data-theme="light"
       data-card-view="detailed"
+      data-density="comfortable"
       className={inter.variable}
       suppressHydrationWarning
     >

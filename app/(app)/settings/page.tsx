@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/states/empty-state";
 import { RepoPicker } from "@/components/settings/repo-picker";
 import { WorkspaceSection } from "./workspace-section";
 import { ThemeSection } from "./theme-section";
+import { DensitySection } from "./density-section";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -57,6 +58,7 @@ export default async function SettingsPage() {
 
       <WorkspaceSection />
       <ThemeSection />
+      <DensitySection />
     </div>
   );
 }

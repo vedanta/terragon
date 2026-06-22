@@ -6,6 +6,9 @@
 /* Summary board cards driven by [data-card-view="summary"] on <html>. */
 @custom-variant card-summary (&:where([data-card-view="summary"] *));
 
+/* Compact density driven by [data-density="compact"] on <html>. */
+@custom-variant compact (&:where([data-density="compact"] *));
+
 /* Design tokens — exact values from docs/ui-spec.md (light). */
 :root {
   --bg: #ffffff;
