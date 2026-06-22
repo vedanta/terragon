@@ -6,6 +6,7 @@ import { ErrorBanner } from "@/components/states/error-banner";
 import { EmptyState } from "@/components/states/empty-state";
 import { RepoPicker } from "@/components/settings/repo-picker";
 import { WorkspaceSection } from "./workspace-section";
+import { ThemeSection } from "./theme-section";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -55,6 +56,7 @@ export default async function SettingsPage() {
       </div>
 
       <WorkspaceSection />
+      <ThemeSection />
     </div>
   );
 }

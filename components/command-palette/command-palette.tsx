@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { type BoardIssue } from "@/lib/view/board-issue";
 import { useToast } from "@/components/toast/toast";
+import { applyThemeMode, getStoredMode, resolveTheme } from "@/lib/theme";
 import { OPEN_PALETTE_EVENT } from "./events";
 
 export function CommandPalette({ issues }: { issues: BoardIssue[] }) {
@@ -34,17 +35,8 @@ export function CommandPalette({ issues }: { issues: BoardIssue[] }) {
   }
 
   function toggleTheme() {
-    const current =
-      document.documentElement.getAttribute("data-theme") === "dark"
-        ? "dark"
-        : "light";
-    const next = current === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    try {
-      localStorage.setItem("terragon-theme", next);
-    } catch {
-      /* ignore */
-    }
+    const resolved = resolveTheme(getStoredMode());
+    applyThemeMode(resolved === "dark" ? "light" : "dark");
     setOpen(false);
   }
 
