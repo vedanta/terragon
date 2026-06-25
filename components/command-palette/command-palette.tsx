@@ -4,14 +4,13 @@ import { Command } from "cmdk";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { type BoardIssue } from "@/lib/view/board-issue";
-import { useToast } from "@/components/toast/toast";
 import { applyThemeMode, getStoredMode, resolveTheme } from "@/lib/theme";
+import { openCreateIssue } from "@/components/create-issue/events";
 import { OPEN_PALETTE_EVENT } from "./events";
 
 export function CommandPalette({ issues }: { issues: BoardIssue[] }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const { showToast } = useToast();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -55,8 +54,8 @@ export function CommandPalette({ issues }: { issues: BoardIssue[] }) {
           <Command.Item
             value="create new issue"
             onSelect={() => {
-              showToast("Create issue — coming in a later group");
               setOpen(false);
+              openCreateIssue();
             }}
           >
             + Create new issue

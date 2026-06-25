@@ -22,6 +22,10 @@ function recordingRest(over: Partial<RestOps> = {}) {
     updateIssue: vi.fn(),
     setAssignees: vi.fn(),
     setMilestone: vi.fn(),
+    createIssue: vi.fn(async (_o, _r, input) => {
+      calls.push(`create-issue:${input.title}`);
+      return { number: 321, url: "https://github.com/o/r/issues/321" };
+    }),
     ...over,
   };
   return { rest, calls };
@@ -93,5 +97,31 @@ describe("GitHubClient writes", () => {
       client.applyTransition("o", "r", 1, plan),
     ).resolves.toBeUndefined();
     expect(removeLabel).toHaveBeenCalled();
+  });
+
+  it("createIssue forwards fields and returns number + url", async () => {
+    const { rest } = recordingRest();
+    const client = new GitHubClient({ rest });
+    const res = await client.createIssue("o", "r", {
+      title: "New thing",
+      body: "details",
+      labels: ["terragon/planned", "bug"],
+      assignees: ["octocat"],
+      milestone: 3,
+    });
+    expect(res).toEqual({
+      number: 321,
+      url: "https://github.com/o/r/issues/321",
+    });
+    expect(rest.createIssue).toHaveBeenCalledWith(
+      "o",
+      "r",
+      expect.objectContaining({
+        title: "New thing",
+        labels: ["terragon/planned", "bug"],
+        assignees: ["octocat"],
+        milestone: 3,
+      }),
+    );
   });
 });
