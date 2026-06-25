@@ -7,6 +7,25 @@ export interface GitHubRepo {
   name: string;
   private: boolean;
   defaultBranch: string;
+  /** "User" (personal) or "Organization". */
+  ownerType: string;
+  /** Viewer has push access (can write labels/issues). */
+  canWrite: boolean;
+}
+
+/** The authenticated user's GitHub login (for ownership detection). */
+export async function getViewerLogin(token: string): Promise<string> {
+  const res = await fetch("https://api.github.com/user", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`GitHub /user failed: ${res.status}`);
+  const json = (await res.json()) as { login: string };
+  return json.login;
 }
 
 /**
@@ -35,9 +54,10 @@ export async function listUserRepos(token: string): Promise<GitHubRepo[]> {
     id: number;
     full_name: string;
     name: string;
-    owner: { login: string };
+    owner: { login: string; type: string };
     private: boolean;
     default_branch: string;
+    permissions?: { admin?: boolean; maintain?: boolean; push?: boolean };
   }>;
 
   return json.map((r) => ({
@@ -47,5 +67,9 @@ export async function listUserRepos(token: string): Promise<GitHubRepo[]> {
     name: r.name,
     private: r.private,
     defaultBranch: r.default_branch,
+    ownerType: r.owner.type,
+    canWrite: Boolean(
+      r.permissions?.push || r.permissions?.maintain || r.permissions?.admin,
+    ),
   }));
 }

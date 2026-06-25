@@ -1,6 +1,10 @@
 import { auth } from "@/auth";
 import { getGithubToken } from "@/lib/github-token";
-import { listUserRepos, type GitHubRepo } from "@/lib/github-repos";
+import {
+  listUserRepos,
+  getViewerLogin,
+  type GitHubRepo,
+} from "@/lib/github-repos";
 import { getCurrentRepo } from "@/lib/workspace";
 import { ErrorBanner } from "@/components/states/error-banner";
 import { EmptyState } from "@/components/states/empty-state";
@@ -13,6 +17,7 @@ export default async function SettingsPage() {
   const session = await auth();
 
   let repos: GitHubRepo[] = [];
+  let viewerLogin = "";
   let error: string | null = null;
   let activeFullName: string | null = null;
 
@@ -23,7 +28,10 @@ export default async function SettingsPage() {
       if (!token) {
         error = "No GitHub token on file — sign out and back in to reconnect.";
       } else {
-        repos = await listUserRepos(token);
+        [repos, viewerLogin] = await Promise.all([
+          listUserRepos(token),
+          getViewerLogin(token),
+        ]);
       }
     } catch {
       error = "Could not load your repositories from GitHub. Try again.";
@@ -52,7 +60,11 @@ export default async function SettingsPage() {
         )}
 
         {repos.length > 0 && (
-          <RepoPicker repos={repos} activeFullName={activeFullName} />
+          <RepoPicker
+            repos={repos}
+            activeFullName={activeFullName}
+            viewerLogin={viewerLogin}
+          />
         )}
       </div>
 

@@ -4,15 +4,20 @@ import { Command } from "cmdk";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { type GitHubRepo } from "@/lib/github-repos";
+import { describeRepoAccess } from "@/lib/repo-access";
 import { chooseRepo } from "@/app/(app)/settings/actions";
 import { useToast } from "@/components/toast/toast";
+
+const badgeClass = "shrink-0 rounded px-1.5 py-0.5 text-[11px] text-fg-subtle";
 
 export function RepoPicker({
   repos,
   activeFullName,
+  viewerLogin,
 }: {
   repos: GitHubRepo[];
   activeFullName: string | null;
+  viewerLogin: string;
 }) {
   const router = useRouter();
   const { showToast } = useToast();
@@ -67,6 +72,7 @@ export function RepoPicker({
           </Command.Empty>
           {repos.map((r) => {
             const active = r.fullName === activeFullName;
+            const access = describeRepoAccess(r, viewerLogin);
             return (
               <Command.Item
                 key={r.id}
@@ -76,8 +82,20 @@ export function RepoPicker({
               >
                 <span className="truncate">{r.fullName}</span>
                 {r.private && (
-                  <span className="rounded bg-hover px-1.5 py-0.5 text-[11px] text-fg-subtle">
-                    private
+                  <span className={`${badgeClass} bg-hover`}>private</span>
+                )}
+                {access.relation === "org" && (
+                  <span className={`${badgeClass} bg-hover`}>Org</span>
+                )}
+                {access.relation === "collaborator" && (
+                  <span className={`${badgeClass} bg-hover`}>Shared</span>
+                )}
+                {access.readOnly && (
+                  <span
+                    className={`${badgeClass} border border-border-strong`}
+                    title="You don't have write access — board changes will be rejected by GitHub"
+                  >
+                    Read-only
                   </span>
                 )}
                 <span className="ml-auto shrink-0 text-[12px]">
