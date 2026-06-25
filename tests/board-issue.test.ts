@@ -29,6 +29,7 @@ describe("board-issue adapters", () => {
       state: "open",
       url: "https://github.com/a/b/issues/42",
       updatedAt: "2026-01-01T00:00:00Z",
+      commentCount: 2,
       labels: ["backend"],
       assignees: [{ login: "octocat", name: "The Octocat", avatarUrl: "x" }],
       milestone: "v1",
@@ -38,6 +39,7 @@ describe("board-issue adapters", () => {
     expect(vm.assignee).toMatchObject({ name: "The Octocat", initials: "TO" });
     expect(vm.labels).toEqual([{ name: "backend", color: expect.any(String) }]);
     expect(vm.url).toBe(resolved.url);
+    expect(vm.commentCount).toBe(2);
   });
 
   it("both adapters yield the same shape", () => {
@@ -50,6 +52,7 @@ describe("board-issue adapters", () => {
         state: "open",
         url: "u",
         updatedAt: "2026-01-01T00:00:00Z",
+        commentCount: 0,
         labels: [],
         assignees: [],
         milestone: null,

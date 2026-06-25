@@ -45,6 +45,14 @@ export function IssueCard({
           <span className="text-fg-subtle">Unassigned</span>
         )}
         {issue.milestone && <span className="truncate">{issue.milestone}</span>}
+        <span className="ml-auto flex shrink-0 items-center gap-2 text-fg-subtle">
+          {issue.commentCount > 0 && (
+            <span title={`${issue.commentCount} comments`}>
+              💬 {issue.commentCount}
+            </span>
+          )}
+          <span title="last updated">{issue.updated}</span>
+        </span>
       </span>
     </button>
   );
