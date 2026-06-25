@@ -1,23 +1,19 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { getBoardData } from "@/lib/board-data";
 import { getActiveRepoAccess } from "@/lib/active-repo-access";
 
 const badge = "rounded px-1.5 py-0.5 text-[11px] leading-none text-fg-subtle";
 
-/** Shows the active repository + access tags; links to Settings to change it. */
-export async function RepositorySwitcher() {
+/** Repo name + access tags — streamed so it never blocks the shell. */
+async function SwitcherContent() {
   const [{ repo }, access] = await Promise.all([
     getBoardData(),
     getActiveRepoAccess(),
   ]);
 
   return (
-    <Link
-      href="/settings"
-      title="Change repository in Settings"
-      className="flex items-center gap-2 rounded-lg border border-border px-2.5 py-1.5 text-[13px] text-fg hover:bg-hover"
-    >
-      <span className="text-fg-subtle">repo</span>
+    <>
       <span className="font-medium">{repo ?? "Select a repository"}</span>
       {repo && access && (
         <>
@@ -40,6 +36,22 @@ export async function RepositorySwitcher() {
           )}
         </>
       )}
+    </>
+  );
+}
+
+/** Shows the active repository; links to Settings to change it. */
+export function RepositorySwitcher() {
+  return (
+    <Link
+      href="/settings"
+      title="Change repository in Settings"
+      className="flex items-center gap-2 rounded-lg border border-border px-2.5 py-1.5 text-[13px] text-fg hover:bg-hover"
+    >
+      <span className="text-fg-subtle">repo</span>
+      <Suspense fallback={<span className="text-fg-subtle">loading…</span>}>
+        <SwitcherContent />
+      </Suspense>
       <span className="text-fg-subtle">▾</span>
     </Link>
   );
