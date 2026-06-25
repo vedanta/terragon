@@ -28,6 +28,41 @@ export async function getViewerLogin(token: string): Promise<string> {
   return json.login;
 }
 
+export interface RepoMeta {
+  private: boolean;
+  ownerType: string;
+  canWrite: boolean;
+}
+
+/** Fetch a single repo's visibility + the viewer's permission. */
+export async function getRepoMeta(
+  token: string,
+  owner: string,
+  name: string,
+): Promise<RepoMeta | null> {
+  const res = await fetch(`https://api.github.com/repos/${owner}/${name}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  const r = (await res.json()) as {
+    private: boolean;
+    owner: { type: string };
+    permissions?: { admin?: boolean; maintain?: boolean; push?: boolean };
+  };
+  return {
+    private: r.private,
+    ownerType: r.owner.type,
+    canWrite: Boolean(
+      r.permissions?.push || r.permissions?.maintain || r.permissions?.admin,
+    ),
+  };
+}
+
 /**
  * List the authenticated user's repositories via the GitHub REST API.
  * Plain fetch for now — the typed GitHub Client spine arrives in G4.
