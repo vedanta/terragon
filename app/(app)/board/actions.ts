@@ -2,11 +2,31 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { db } from "@/db";
+import { syncEvents } from "@/db/schema";
 import { getGithubToken } from "@/lib/github-token";
 import { GitHubClient } from "@/lib/github/client";
 import { transitionPlan, STATUS_LABEL_COLORS } from "@/lib/status/transition";
 import { STATUS_ORDER, type StatusKey } from "@/fixtures/seed";
 import { getCurrentRepo, getWorkspaceConfig } from "@/lib/workspace";
+
+/** Best-effort audit log; never blocks the actual write. */
+async function recordEvent(
+  repositoryId: string,
+  eventType: string,
+  payload: Record<string, unknown>,
+) {
+  try {
+    await db.insert(syncEvents).values({
+      repositoryId,
+      eventType,
+      status: "ok",
+      payload: JSON.stringify(payload),
+    });
+  } catch {
+    /* audit is best-effort */
+  }
+}
 
 const USE_FIXTURES = process.env.USE_FIXTURES !== "false";
 
@@ -52,8 +72,14 @@ export async function moveIssue(
       cfg.labels,
     );
     await client.applyTransition(repo.owner, repo.name, issueNumber, plan);
+    await recordEvent(repo.id, "status_change", {
+      issue: issueNumber,
+      from: current,
+      to: target,
+    });
     revalidatePath("/board");
     revalidatePath("/grooming");
+    revalidatePath("/activity");
     return { ok: true };
   } catch (err) {
     console.error("[terragon] moveIssue failed", { issue: issueNumber }, err);
@@ -130,9 +156,14 @@ export async function createIssue(
         "closed",
       );
     }
+    await recordEvent(repo.id, "issue_created", {
+      number: created.number,
+      status: input.status,
+    });
     revalidatePath("/board");
     revalidatePath("/grooming");
     revalidatePath("/dashboard");
+    revalidatePath("/activity");
     return { ok: true, number: created.number, url: created.url };
   } catch (err) {
     console.error("[terragon] createIssue failed", err);

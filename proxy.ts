@@ -10,6 +10,7 @@ const PROTECTED = [
   "/grooming",
   "/milestones",
   "/my-work",
+  "/activity",
   "/settings",
 ];
 
