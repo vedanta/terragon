@@ -2,14 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/toast/toast";
 import { openCommandPalette } from "@/components/command-palette/events";
 import { openShortcutsHelp } from "@/components/help/events";
+import { openCreateIssue } from "@/components/create-issue/events";
 
 /** Global shortcuts: `N` new, `G then B/G/M` nav, `/` open palette. (⌘K also opens it.) */
 export function KeyboardShortcuts() {
   const router = useRouter();
-  const { showToast } = useToast();
   const gPending = useRef(false);
   const gTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -54,7 +53,7 @@ export function KeyboardShortcuts() {
       }
       if (k === "n") {
         e.preventDefault();
-        showToast("Create issue — coming soon");
+        openCreateIssue();
       }
     }
 
@@ -65,7 +64,7 @@ export function KeyboardShortcuts() {
 
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [router, showToast]);
+  }, [router]);
 
   return null;
 }

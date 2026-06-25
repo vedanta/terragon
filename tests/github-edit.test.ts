@@ -11,6 +11,7 @@ function stubRest(over: Partial<RestOps> = {}): RestOps {
     updateIssue: vi.fn(),
     setAssignees: vi.fn(),
     setMilestone: vi.fn(),
+    createIssue: vi.fn(async () => ({ number: 1, url: "u" })),
     ...over,
   };
 }

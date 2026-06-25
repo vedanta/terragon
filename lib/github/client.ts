@@ -88,6 +88,19 @@ export interface RestOps {
     issue: number,
     milestone: number | null,
   ): Promise<void>;
+  createIssue(
+    owner: string,
+    repo: string,
+    input: NewIssue,
+  ): Promise<{ number: number; url: string }>;
+}
+
+export interface NewIssue {
+  title: string;
+  body?: string;
+  labels?: string[];
+  assignees?: string[];
+  milestone?: number | null;
 }
 
 const ISSUES_QUERY = `
@@ -304,6 +317,25 @@ export class GitHubClient {
     );
   }
 
+  createIssue(
+    owner: string,
+    repo: string,
+    input: NewIssue,
+  ): Promise<{ number: number; url: string }> {
+    return this.withBackoff(() => this.rest.createIssue(owner, repo, input));
+  }
+
+  setIssueState(
+    owner: string,
+    repo: string,
+    issue: number,
+    state: "open" | "closed",
+  ): Promise<void> {
+    return this.withBackoff(() =>
+      this.rest.setIssueState(owner, repo, issue, state),
+    );
+  }
+
   async removeLabel(
     owner: string,
     repo: string,
@@ -369,6 +401,18 @@ function restFromOctokit(ok: Octokit): RestOps {
     async setMilestone(owner, repo, issue_number, milestone) {
       await ok.rest.issues.update({ owner, repo, issue_number, milestone });
     },
+    async createIssue(owner, repo, input) {
+      const res = await ok.rest.issues.create({
+        owner,
+        repo,
+        title: input.title,
+        body: input.body,
+        labels: input.labels,
+        assignees: input.assignees,
+        milestone: input.milestone ?? undefined,
+      });
+      return { number: res.data.number, url: res.data.html_url };
+    },
   };
 }
 
@@ -385,6 +429,7 @@ function throwingRest(): RestOps {
     updateIssue: fail,
     setAssignees: fail,
     setMilestone: fail,
+    createIssue: fail,
   };
 }
 

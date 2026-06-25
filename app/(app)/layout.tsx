@@ -7,12 +7,23 @@ import { MobileNav } from "@/components/app-shell/mobile-nav";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { ShortcutsHelp } from "@/components/help/shortcuts-help";
 import { ProgressBar } from "@/components/progress/progress-bar";
+import { CreateIssueModal } from "@/components/create-issue/create-issue-modal";
 import { getBoardData } from "@/lib/board-data";
+import { getBoardMeta } from "@/lib/board-meta";
 
 /** Streams the palette's issue list so the shell paints without blocking on GitHub. */
 async function CommandPaletteLoader() {
   const { issues } = await getBoardData();
   return <CommandPalette issues={issues} />;
+}
+
+/** Streams the new-issue modal's field options + live flag. */
+async function CreateIssueLoader() {
+  const [{ source }, meta] = await Promise.all([
+    getBoardData(),
+    getBoardMeta(),
+  ]);
+  return <CreateIssueModal meta={meta} live={source === "live"} />;
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -31,6 +42,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
       <Suspense fallback={null}>
         <CommandPaletteLoader />
+      </Suspense>
+      <Suspense fallback={null}>
+        <CreateIssueLoader />
       </Suspense>
       <KeyboardShortcuts />
       <ShortcutsHelp />
