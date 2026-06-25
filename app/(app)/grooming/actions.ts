@@ -99,5 +99,6 @@ export async function applyBatch(
 
   revalidatePath("/board");
   revalidatePath("/grooming");
+  revalidatePath("/activity");
   return result;
 }
