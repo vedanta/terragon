@@ -7,6 +7,7 @@ import { type GitHubRepo } from "@/lib/github-repos";
 import { describeRepoAccess } from "@/lib/repo-access";
 import { chooseRepo } from "@/app/(app)/settings/actions";
 import { useToast } from "@/components/toast/toast";
+import { useProgress } from "@/components/progress/use-progress";
 
 const badgeClass = "shrink-0 rounded px-1.5 py-0.5 text-[11px] text-fg-subtle";
 
@@ -22,6 +23,7 @@ export function RepoPicker({
   const router = useRouter();
   const { showToast } = useToast();
   const [pending, startTransition] = useTransition();
+  useProgress(pending);
   const [choosing, setChoosing] = useState<string | null>(null);
 
   function pick(repo: GitHubRepo) {
@@ -38,7 +40,8 @@ export function RepoPicker({
       });
       showToast(`Active repository: ${repo.fullName}`);
       setChoosing(null);
-      router.refresh();
+      // Land on the board, which streams its own "Loading issues…" state.
+      router.push("/board");
     });
   }
 
