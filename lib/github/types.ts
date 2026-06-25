@@ -12,6 +12,7 @@ export interface RawIssue {
   state: "open" | "closed";
   url: string;
   updatedAt: string;
+  commentCount: number;
   labels: string[];
   assignees: RawAssignee[];
   milestone: string | null;

@@ -14,6 +14,7 @@ function raw(
     state,
     url: `u/${number}`,
     updatedAt: "2026-01-01T00:00:00Z",
+    commentCount: 0,
     labels,
     assignees: [],
     milestone: null,

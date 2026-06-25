@@ -12,6 +12,7 @@ interface GqlIssueNode {
   state: string;
   url: string;
   updatedAt: string;
+  comments: { totalCount: number };
   labels: { nodes: { name: string }[] };
   assignees: {
     nodes: { login: string; name: string | null; avatarUrl: string }[];
@@ -110,6 +111,7 @@ const ISSUES_QUERY = `
         pageInfo { hasNextPage endCursor }
         nodes {
           number title body state url updatedAt
+          comments { totalCount }
           labels(first: 30) { nodes { name } }
           assignees(first: 10) { nodes { login name avatarUrl } }
           milestone { title }
@@ -441,6 +443,7 @@ function mapIssue(n: GqlIssueNode): RawIssue {
     state: n.state.toLowerCase() === "closed" ? "closed" : "open",
     url: n.url,
     updatedAt: n.updatedAt,
+    commentCount: n.comments?.totalCount ?? 0,
     labels: n.labels.nodes.map((l) => l.name),
     assignees: n.assignees.nodes.map((a) => ({
       login: a.login,

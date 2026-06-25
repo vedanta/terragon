@@ -24,6 +24,7 @@ export interface BoardIssue {
   updated: string;
   /** Sortable recency key (higher = newer). Comparable only within one source. */
   updatedRank: number;
+  commentCount: number;
   description: string;
   url: string;
   comments: Comment[];
@@ -107,6 +108,7 @@ export function fromFixtureIssue(i: Issue): BoardIssue {
     milestone: i.milestone,
     updated: i.updated,
     updatedRank: -parseRelativeSeconds(i.updated),
+    commentCount: i.comments.length,
     description: i.description,
     url: `https://github.com/acme/platform/issues/${i.number}`,
     comments: i.comments,
@@ -134,6 +136,7 @@ export function fromResolvedIssue(i: ResolvedIssue): BoardIssue {
     milestone: i.milestone,
     updated: relativeTime(i.updatedAt),
     updatedRank: Date.parse(i.updatedAt) || 0,
+    commentCount: i.commentCount,
     description: i.body,
     url: i.url,
     comments: [],
